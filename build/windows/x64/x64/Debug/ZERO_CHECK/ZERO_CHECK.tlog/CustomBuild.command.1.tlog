@@ -1,0 +1,10 @@
+^C:\USERS\VONTOS\DESKTOP\PROJECT [ATM]\CDBS_ADMIN\BUILD\WINDOWS\X64\CMAKEFILES\61D2D23C9C2A350D585D5BE02D78C641\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Vontos/Desktop/Project [atm]/cdbs_admin/windows" "-BC:/Users/Vontos/Desktop/Project [atm]/cdbs_admin/build/windows/x64" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Vontos/Desktop/Project [atm]/cdbs_admin/build/windows/x64/cdbs_admin.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
