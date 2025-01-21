@@ -1,9 +1,12 @@
 //LANDING PAGE
 
+import 'dart:async';
+
 import 'package:cdbs_admin/bloc/auth/auth_bloc.dart';
 import 'package:cdbs_admin/subpages/admissions/admission_applications_page.dart';
 import 'package:cdbs_admin/subpages/admissions/admission_overview_page.dart';
 import 'package:cdbs_admin/subpages/admissions/admission_payments_page.dart';
+import 'package:cdbs_admin/subpages/admissions/admission_pre_enrollment_page.dart';
 import 'package:cdbs_admin/subpages/admissions/admission_requirements_page.dart';
 import 'package:cdbs_admin/subpages/admissions/admission_results_page.dart';
 import 'package:cdbs_admin/subpages/admissions/admission_schedules_page.dart';
@@ -45,6 +48,59 @@ class _LandingPageState extends State<LandingPage> {
   int _selectedAdmissionDropdownOption = 0; // Tracks selected option in dropdown
   int _selectedPreEnrollmentDropdownOption = 0; 
    int _openDropdownIndex = -1;
+
+  late Timer _timer;
+  String _greeting = "";
+
+   String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return "Good morning wonderful person!";
+    } else if (hour >= 12 && hour < 17) {
+      return "Good afternoon wonderful person!";
+    } else {
+      return "Good evening wonderful person!";
+    }
+  }
+
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _updateGreeting();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateGreeting(); // Set the initial greeting
+    _startTimer();     // Start the timer
+  }
+
+  void _updateGreeting() {
+    final hour = DateTime.now().hour;
+    String newGreeting;
+    if (hour >= 5 && hour < 12) {
+      newGreeting = "Good morning wonderful person!";
+    } else if (hour >= 12 && hour < 18) {
+      newGreeting = "Good afternoon wonderful person!";
+    } else {
+      newGreeting = "Good evening wonderful person!";
+    }
+
+    // Update the greeting only if it changes
+    if (newGreeting != _greeting) {
+      setState(() {
+        _greeting = newGreeting;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel(); // Stop the timer when the widget is disposed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,8 +177,7 @@ class _LandingPageState extends State<LandingPage> {
                               color: const Color(0XFF13322B),
                             ),
                           ),
-                          Text(
-                            'Good morning wonderful person!',
+                          Text(_greeting,
                             style: TextStyle(
                               fontSize: 12 * scale,
                               fontFamily: "Varela-R",
@@ -247,9 +302,7 @@ Padding(
                       onPressed: () {
                         Navigator.of(context).pop(); // Close the modal
                         // Add your "Yes" action here
-                        context
-                                      .read<AuthBloc>()
-                                      .add(AuthLogoutRequested());
+                        context.read<AuthBloc>().add(AuthLogoutRequested());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xff012169),
@@ -484,7 +537,7 @@ return Column(
             }else if(authState.adminType=='Cashier'){
               dropdownOptions = ["Payments"];
             }else if(authState.adminType=='Registrar'){
-              dropdownOptions = ["Overview", "Applications", "Requirements", "Payments", "Schedules"];
+              dropdownOptions = ["Slots","Overview", "Applications", "Requirements", "Payments", "Schedules"];
             }else if(authState.adminType=='Admission' || authState.adminType=='Center for Learner Wellness'){
               dropdownOptions = ["Slots", "Overview", "Applications", "Requirements", "Schedules", "Results"];
             }
@@ -721,7 +774,7 @@ return Column(
 
     if (_selectedPage == 3) {
       // Show content based on selected dropdown option for Page 5
-      if(adminType !='Admission' && adminType !='Center for Learner Wellness'){
+      if(adminType =='Registrar' || adminType =='Admin' || adminType=='Sisters' || adminType=='Principal' || adminType=='IT'){
         switch (_selectedAdmissionDropdownOption) {
           case 0:
             return const AdmissionSlotsPage1();
@@ -737,6 +790,13 @@ return Column(
             return const AdmissionSchedulesPage();
           default:
             return const AdmissionResultsPage();
+        }
+      }else if(adminType =='Cashier'){
+        switch (_selectedAdmissionDropdownOption) {
+          case 0:
+            return const AdmissionPaymentsPage();
+          default:
+            return const AdmissionPaymentsPage();
         }
       }else{
         switch (_selectedAdmissionDropdownOption) {
@@ -767,7 +827,7 @@ return Column(
       // Show content based on selected dropdown option for Page 5
       switch (_selectedPreEnrollmentDropdownOption) {
         case 0:
-          return const S1Page();
+          return const PreEnrollmentPage();
         case 1:
           return const S1Page();
         default:

@@ -34,6 +34,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
   String? dateCreatedString;
   String? formattedDate;
   String? docStatus;
+  String? refNo;
 
   List<Map<String, dynamic>> myformDetails=[];
 
@@ -41,9 +42,11 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
   void initState() {
     super.initState();
     myformDetails=widget.formDetails!;
+    refNo= myformDetails[0]['db_admission_table']['reference_no'] ?? '';
     applicationId = myformDetails[0]['db_admission_table']['admission_form_id'];
     fullName='${myformDetails[0]['db_admission_table']['first_name']} ${myformDetails[0]['db_admission_table']['last_name']}';
     status=myformDetails[0]['db_admission_table']['admission_status'];
+    bool isPaid=myformDetails[0]['db_admission_table']['is_paid']??false;
     if(myformDetails[0]['db_admission_table']['payment_date']!=null){
       dateCreatedString = myformDetails[0]['db_admission_table']['payment_date'];
       DateTime dateCreated = DateTime.parse(dateCreatedString!);
@@ -52,7 +55,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
       formattedDate='---';
     }
 
-    if(myformDetails[0]['db_admission_table']['is_paid']){
+    if(isPaid){
       isGreenExpanded=true;
     }else{
       if(myformDetails[0]['db_admission_table']['admission_status']=='rejected'){
@@ -294,17 +297,6 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                                                                                         child: Column(
                                                                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                           children: [
-                                                                                            // Centered Text
-                                                                                            const Center(
-                                                                                              // child: Text(
-                                                                                              //   "",
-                                                                                              //   style: TextStyle(
-                                                                                              //     fontSize: 20,
-                                                                                              //   ),
-                                                                                              //   textAlign: TextAlign.center,
-                                                                                              // ),
-                                                                                            ),
-                                                                                            // Red X Icon with Circular Outline
                                                                                             Column(
                                                                                               children: [
                                                                                                 Container(
@@ -451,13 +443,156 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                               width: isRedExpanded ? 99 : 47,
                               height: 44,
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
 
-                                  setState(() {
-                                    isRedExpanded = true;
-                                    isGreenExpanded = false;
-                                    _isInvoiceDisabled[i] = true; // Disable invoice button
-                                  });
+                                  context.read<AdmissionBloc>().add(IsLoadingClicked(true));
+                                                                        try {
+                                                                              final response = await http.post(
+                                                                                Uri.parse('$apiUrl/api/admin/update_admission'),
+                                                                                headers: {
+                                                                                  'Content-Type': 'application/json',
+                                                                                  'supabase-url': supabaseUrl,
+                                                                                  'supabase-key': supabaseKey,
+                                                                                },
+                                                                                body: json.encode({
+                                                                                  'admission_id': myformDetails[0]['db_admission_table']['admission_id'],
+                                                                                  'admission_status':'rejected',  // Send customer_id in the request body
+                                                                                  'user_id':widget.userId,
+                                                                                  'is_paid':false,
+                                                                                  'is_done':true
+                                                                                }),
+                                                                              );
+                                                                              
+                                                                              
+                                  
+                                                                              if (response.statusCode == 200) {
+                                                                                final responseBody = jsonDecode(response.body);
+                                                                                context.read<AdmissionBloc>().add(IsLoadingClicked(false));
+                                                                                updateData(myformDetails[0]['db_admission_table']['admission_id']);
+                                                                                  setState(() {
+                                                                                    isRedExpanded = true;
+                                                                                    isGreenExpanded = false;
+                                                                                    _isInvoiceDisabled[i] = true; // Disable invoice button
+                                                                                  });
+                                                                                showDialog(
+                                                                                  context: context,
+                                                                                  builder: (BuildContext context) {
+                                                                                    return Dialog(
+                                                                                      shape: RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.circular(10),
+                                                                                      ),
+                                                                                      child: Container(
+                                                                                        width: 349,
+                                                                                        height: 272,
+                                                                                        padding: const EdgeInsets.all(16),
+                                                                                        child: Column(
+                                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                          children: [
+                                                                                            Column(
+                                                                                              children: [
+                                                                                                Container(
+                                                                                                  width: 90,
+                                                                                                  height: 90,
+                                                                                                  decoration: BoxDecoration(
+                                                                                                    shape: BoxShape.circle,
+                                                                                                    border: Border.all(color: const Color(0XFF012169), width: 2),
+                                                                                                  ),
+                                                                                                  child: const Center(
+                                                                                                    child: Icon(
+                                                                                                      Icons.check,
+                                                                                                      color: Color(0XFF012169),
+                                                                                                      size: 40,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ),
+                                                                                                const SizedBox(height: 20),
+                                                                                                // No Form Submitted Text
+                                                                                                const Text(
+                                                                                                  "Application marked as unpaid",
+                                                                                                  style: TextStyle(
+                                                                                                    fontSize: 20,
+                                                                                                    fontWeight: FontWeight.bold,
+                                                                                                  ),
+                                                                                                  textAlign: TextAlign.center,
+                                                                                                ),
+                                                                                              ],
+                                                                                            ),
+                                                                                            // Divider
+                                                                                            const Divider(
+                                                                                              thickness: 1,
+                                                                                              color: Colors.grey,
+                                                                                            ),
+                                                                                            // Close Button
+                                                                                            Align(
+                                                                                              alignment: Alignment.bottomCenter,
+                                                                                              child: ElevatedButton(
+                                                                                                onPressed: () {
+                                                                                                  Navigator.of(context).popUntil((route) => route.isFirst);
+                                                                                                },
+                                                                                                style: ElevatedButton.styleFrom(
+                                                                                                  backgroundColor: const Color(0xff012169), // Button color
+                                                                                                  shape: RoundedRectangleBorder(
+                                                                                                    borderRadius: BorderRadius.circular(8),
+                                                                                                  ),
+                                                                                                  minimumSize: const Size(double.infinity, 50), // Expand width and set height
+                                                                                                ),
+                                                                                                child: const Text(
+                                                                                                  "Close",
+                                                                                                  style: TextStyle(fontSize: 16, color: Colors.white),
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                      ),
+                                                                                    );
+                                                                                  },
+                                                                                );
+                                                                              } else {
+                                                                                // Handle failure
+                                                                                final responseBody = jsonDecode(response.body);
+                                                                                print('Error: ${responseBody['error']}');
+                                  
+                                                                                // Show failure modal
+                                                                                showDialog(
+                                                                                  context: context,
+                                                                                  builder: (context) => AlertDialog(
+                                                                                    title: const Text("Error"),
+                                                                                    content: Text("Failed to complete review: ${responseBody['error']}"),
+                                                                                    actions: [
+                                                                                      TextButton(
+                                                                                        onPressed: () {
+                                                                                          Navigator.of(context).pop(); // Close the dialog
+                                                                                        },
+                                                                                        child: const Text("OK"),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                );
+                                                                              }
+                                                                            } catch (error) {
+                                                                              // Handle error (e.g., network error)
+                                                                              print('Error: $error');
+                                  
+                                                                              // Show error modal
+                                                                              showDialog(
+                                                                                context: context,
+                                                                                builder: (context) => AlertDialog(
+                                                                                  title: const Text("Error"),
+                                                                                  content: const Text("An unexpected error occurred. Please try again later."),
+                                                                                  actions: [
+                                                                                    TextButton(
+                                                                                      onPressed: () {
+                                                                                        Navigator.of(context).pop(); // Close the dialog
+                                                                                      },
+                                                                                      child: const Text("OK"),
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                              );
+                                                                            }
+
+                                  
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red,
@@ -485,6 +620,15 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                       Expanded(
                         flex: 3,
                         child: _buildInfoColumn(
+                          label: 'Reference No: ',
+                          value: refNo!,
+                          scale: scale,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: _buildInfoColumn(
                           label: 'Payment Type',
                           value: 'Application Fee',
                           scale: scale,
@@ -492,7 +636,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        flex: 3,
+                        flex: 2,
                         child: _buildInfoColumn(
                           label: 'Total Amount',
                           value: '600.00',

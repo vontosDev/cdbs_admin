@@ -38,6 +38,7 @@ class _AdmissionApplicationsPageState extends State<AdmissionApplicationsPage> {
     _apiService = ApiService(apiUrl); // Replace with your actual API URL
     admissionForms = _apiService.streamAdmissionForms(supabaseUrl, supabaseKey);
     // Initialize the service with your endpoint
+   
   }
 
   void _onSearchChanged(String value) {
@@ -454,7 +455,6 @@ String formatDate(DateTime date) {
       listener: (context, state) {},
       builder: (context, state) {
               bool isButtonEnabled = false;
-
               // Enable button based on the state
               if (state is AdmissionStatusUpdated) {
                 isButtonEnabled = state.isComplete;

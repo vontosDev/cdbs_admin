@@ -154,7 +154,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await prefs.setInt('uid', user['admin_id']);
           await prefs.setString('adminType', user['db_admin_type']['admin_type']);
           await prefs.setString('firstName', user['first_name']);
-          await prefs.setString('middleName', user['middle_name']);
+          await prefs.setString('middleName', user['middle_name'] ??"");
           await prefs.setString('lastName', user['last_name']);
           await prefs.setString('email', user['email_address']);
           await prefs.setString('department', user['db_admin_department']['department']);
@@ -167,7 +167,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             uid: user['admin_id'],
             adminType: user['db_admin_type']['admin_type'],
             firstName: user['first_name'],
-            middleName: user['middle_name'],
+            middleName: user['middle_name'] ??"",
             lastName: user['last_name'],
             email: user['email_address'],
             department: user['db_admin_department']['department'],

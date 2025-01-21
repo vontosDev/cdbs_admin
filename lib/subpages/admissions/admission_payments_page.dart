@@ -106,7 +106,7 @@ String formatDate(DateTime date) {
         return const Color(0xFFFFA500); // Yellow for in-review
       } else if (status.contains('pending')) {
         return const Color(0xFFB6B6B6); // Orange for pending
-      }else if (status.contains('failed')) {
+      }else if (status.contains('rejected')) {
         return const Color(0xFFE15252); // Orange for pending
       } else {
         return Colors.black; // Default color
@@ -342,7 +342,6 @@ SizedBox(
                                         // Set active button index to the first button and filter by approved status
                                         activeButtonIndex = 0;
                                         filterByStatus('Cash');
-                                        print(filteredRequest.length);
                                       }
                                     });
                                   },
@@ -417,13 +416,13 @@ const SizedBox(height: 40),
               style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
             ),
           ),
-          Expanded(
+         /* Expanded(
             flex: 2,
             child: Text(
               'Reference No',
               style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
             ),
-          ),
+          ),*/
           Expanded(
             flex: 2,
             child: Text(
@@ -458,7 +457,7 @@ const SizedBox(height: 40),
 
                   String stat= request['db_admission_table']['admission_status'];
                   bool isRequired= request['db_admission_table']['is_all_required_file_uploaded'];
-                  bool isPaid= request['db_admission_table']['is_paid'];
+                  bool isPaid= request['db_admission_table']['is_paid'] ?? false;
                   String paymethod='---';
                   if(request['db_admission_table']['db_payment_method_table'] != null){
                      paymethod =request['db_admission_table']['db_payment_method_table']['payment_method'];
@@ -509,12 +508,12 @@ const SizedBox(height: 40),
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
                     ),
-                    Expanded(
+                   /* Expanded(
                       flex: 2,
                       child: Text( request['reference_no'] ?? '',
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
-                    ),
+                    ),*/
                     Expanded(
                       flex: 2,
                       child: Text(!isPaid?stat=='complete' && isRequired?'PENDING':stat.toUpperCase():'COMPLETE',
@@ -541,8 +540,8 @@ const SizedBox(height: 40),
                                           formDetails=members;
                                           _selectedAction = value; // Change the selected action
                                         });
-
-                                        if(!request['db_admission_table']['is_paid']){
+                                        bool isPaid = request['db_admission_table']['is_paid']??false;
+                                        if(!isPaid){
                                           try {
                                             final response = await http.post(
                                               Uri.parse('$apiUrl/api/admin/update_admission'),
@@ -729,8 +728,8 @@ const SizedBox(height: 40),
     String admissionStatusB = b['db_admission_table']['admission_status'] ?? '';
 
     // Extract the is_complete_view flag
-    bool isCompleteA = a['db_admission_table']['is_paid'];
-    bool isCompleteB = b['db_admission_table']['is_paid'];
+    bool isCompleteA = a['db_admission_table']['is_paid'] ?? false;
+    bool isCompleteB = b['db_admission_table']['is_paid'] ?? false;
 
     // 1. First, check for 'pending' - it should come first.
     if (admissionStatusA == 'pending' && admissionStatusB != 'pending' && !isCompleteA) {

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:html' as html;
 
 class AdmissionApplicationsPage2 extends StatefulWidget {
   
@@ -60,6 +61,10 @@ bool isEditable = false;
 bool isLastPage = false;
 bool isLoading = false;
 
+String originalUrl = '';
+String encodedUrl='';
+String noSibling='';
+
 TextEditingController dateController = TextEditingController();
 TextEditingController fnameController = TextEditingController();
 TextEditingController mnameController = TextEditingController();
@@ -78,6 +83,12 @@ TextEditingController languageSpokenController = TextEditingController();
 TextEditingController companionController = TextEditingController();
 TextEditingController siblingQuantityController = TextEditingController();
 
+
+//special concern
+TextEditingController specialConcernController = TextEditingController();
+TextEditingController mdpConditionController = TextEditingController();
+TextEditingController medicationController = TextEditingController();
+TextEditingController interventionController = TextEditingController();
 
 
 //father controllers details
@@ -116,7 +127,7 @@ TextEditingController guardianSalaryScaleController = TextEditingController();
 String? guardianRelationTo;
 
 
-String? parentStatus;
+String parentStatus = 'Married';
 TextEditingController civilWeddingController = TextEditingController();
 TextEditingController churchNameController = TextEditingController();
 
@@ -241,17 +252,13 @@ void addItemDescription(double scale) {
       schoolBisControllers.add(TextEditingController());
     }
     while (nameControllers.length > quantityReceived) {
-      TextEditingController removedController =
-          nameControllers.removeLast();
+      TextEditingController removedController = nameControllers.removeLast();
       removedController.dispose(); // Dispose the removed controller
-      TextEditingController removedQuantityController =
-          ageControllers.removeLast();
+      TextEditingController removedQuantityController = ageControllers.removeLast();
       removedQuantityController.dispose(); // Dispose the removed controller
-      TextEditingController removedpriceController =
-          gradeLevelControllers.removeLast();
+      TextEditingController removedpriceController = gradeLevelControllers.removeLast();
       removedpriceController.dispose();
-      TextEditingController removedorderDocController =
-          schoolBisControllers.removeLast();
+      TextEditingController removedorderDocController = schoolBisControllers.removeLast();
       removedorderDocController.dispose();
     }
     List<Widget> newDescriptions = [];
@@ -286,7 +293,7 @@ void addItemDescription(double scale) {
                             ),
                             const SizedBox(height: 8),
                             SizedBox(
-                              width: 600,
+                              width: 400,
                               height: 40,
                               child: TextField(
                                 controller: name,
@@ -404,11 +411,9 @@ void addItemDescription(double scale) {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
-    //fetchLoaRequest();
     address = widget.formDetails![0]['db_admission_table']['address'] as String;
     parts = address.split('|');
     if (parts.isNotEmpty) {
@@ -421,7 +426,7 @@ void addItemDescription(double scale) {
     }
 
 
-     String noSibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['no_of_siblings'].toString();
+     
     
      selectedGender =widget.formDetails![0]['db_admission_table']['sex'] ??'';
      fnameController.text=widget.formDetails![0]['db_admission_table']['first_name']??'';
@@ -439,88 +444,127 @@ void addItemDescription(double scale) {
      contactController.text=widget.formDetails![0]['db_admission_table']['contact_no']??'';
      languageSpokenController.text=widget.formDetails![0]['db_admission_table']['language_dialect_spoken']??'';
      companionController.text=widget.formDetails![0]['db_admission_table']['usual_companion_at_home']??'';
-     parentStatus=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['parent_status'];
-     civilWeddingController.text=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['civil_wedding'] ?? '';
-     churchNameController.text=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['church_name'] ?? '';
-     siblingQuantityController.text=noSibling == 'null' ?'0':noSibling;
+
+      
      DateTime dateOfBirth = DateTime.parse(dateController.text);
      DateTime today = DateTime.now();
      int age = today.year - dateOfBirth.year;
-
-    for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length;i++){
-      var sibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'][i];
-      String sdate=sibling['sibling_bday'];
-      DateTime siblingBday = DateTime.parse(sdate);
-      int siblingAge = today.year - siblingBday.year;
-      if (today.month < siblingBday.month || (today.month == siblingBday.month && today.day < siblingBday.day)) {
-        siblingAge--;
-      }
-      nameControllers.add(TextEditingController());
-      ageControllers.add(TextEditingController());
-      gradeLevelControllers.add(TextEditingController());
-      schoolBisControllers.add(TextEditingController());
-      name = nameControllers[i];
-      ageSibling=ageControllers[i];
-      gradeLevel = gradeLevelControllers[i];
-      schoolBis = schoolBisControllers[i];
-
-      name.text='${sibling['sibling_first_name']} ${sibling['sibling_middle_name']} ${sibling['sibling_last_name']}';
-      ageSibling.text=siblingAge.toString();
-      gradeLevel.text=sibling['sibling_grade_course_occupation'];
-      schoolBis.text=sibling['sibling_school_business'];
-    }
-
-  // // Adjust for whether the birthday has passed this year or not
-    if (today.month < dateOfBirth.month || (today.month == dateOfBirth.month && today.day < dateOfBirth.day)) {
-      age--;
-    }
-    ageController.text=age.toString();
-    updateQuantity();
-    addItemDescription(1);
-
-
-    if(widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_parent_table'].length>0){
-      for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_parent_table'].length;i++){
-        var parent = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_parent_table'][i];
-        String fullName='${parent['first_name']} ${parent['last_name']}';
-        DateTime dateOfBirth = DateTime.parse(parent['date_of_birth']);
-        DateTime today = DateTime.now();
-        int age = today.year - dateOfBirth.year;
-        if(parent['relationship_to_child']=='mother'){
-          motherNameController.text = fullName;
-          motherAgeController.text = age.toString();
-          motherEduAttainController.text=parent['educational_attainment'];
-          motherEmploymentStatus = parent['employment_status'];
-          motherEmployedAtController.text = parent['employed_at'] ?? '';
-          motherOfficeAddressController.text=parent['office_address'] ?? '';
-          motherContactController.text=parent['contact_no'] ?? '';
-          motherWorkPositionController.text = parent['job_position'] ?? '';
-          motherSalary = parent['salary_scale'] ?? '';
-        }else if(parent['relationship_to_child']=='father'){
-          fatherNameController.text = fullName;
-          fatherAgeController.text = age.toString();
-          fatherEduAttainController.text=parent['educational_attainment'];
-          fatherEmploymentStatus = parent['employment_status'];
-          fatherEmployedAtController.text = parent['employed_at'] ?? '';
-          fatherOfficeAddressController.text=parent['office_address'] ?? '';
-          fatherContactController.text=parent['contact_no'] ?? '';
-          fatherWorkPositionController.text = parent['job_position'] ?? '';
-          fatherSalary = parent['salary_scale'] ?? '';
-        }else if(parent['relationship_to_child']=='guardian'){
-          guardianNameController.text = fullName;
-          guardianAgeController.text = age.toString();
-          guardianEduAttainController.text=parent['educational_attainment'];
-          guardianEmploymentStatus = parent['employment_status']??'';
-          guardianEmployedAtController.text = parent['employed_at'] ?? '';
-          guardianOfficeAddressController.text=parent['office_address'] ?? '';
-          guardianContactController.text=parent['contact_no'] ?? '';
-          guardianWorkPositionController.text = parent['job_position'] ?? '';
-          guardianRelationTo = parent['relationship_to_child'] ?? '';
-          guardianSalary = parent['salary_scale'] ?? '';
+     if(widget.formDetails![0]['db_admission_table']['db_family_background_table'].isNotEmpty){
+      noSibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['no_of_siblings'].toString();
+      parentStatus=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['parent_status'] ?? '';
+      civilWeddingController.text=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['civil_wedding'] ?? '';
+      churchNameController.text=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['church_name'] ?? '';
+      for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length;i++){
+        var sibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'][i];
+        String sdate=sibling['sibling_bday'];
+        DateTime siblingBday = DateTime.parse(sdate);
+        int siblingAge = today.year - siblingBday.year;
+        if (today.month < siblingBday.month || (today.month == siblingBday.month && today.day < siblingBday.day)) {
+          siblingAge--;
         }
+        nameControllers.add(TextEditingController());
+        ageControllers.add(TextEditingController());
+        gradeLevelControllers.add(TextEditingController());
+        schoolBisControllers.add(TextEditingController());
+        name = nameControllers[i];
+        ageSibling=ageControllers[i];
+        gradeLevel = gradeLevelControllers[i];
+        schoolBis = schoolBisControllers[i];
+
+        name.text='${sibling['sibling_first_name']} ${sibling['sibling_middle_name']} ${sibling['sibling_last_name']}';
+        ageSibling.text=siblingAge.toString();
+        gradeLevel.text=sibling['sibling_grade_course_occupation'];
+        schoolBis.text=sibling['sibling_school_business'];
       }
-    }
+      if (today.month < dateOfBirth.month || (today.month == dateOfBirth.month && today.day < dateOfBirth.day)) {
+        age--;
+      }
+      ageController.text=age.toString();
+      updateQuantity();
+      addItemDescription(widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length);
+     }
+     
+     siblingQuantityController.text=noSibling == 'null' ?'0':noSibling;
+     
+     
+
+     if(widget.formDetails![0]['db_admission_table']['db_special_concerns_table'].isNotEmpty && widget.formDetails![0]['db_admission_table']['db_special_concerns_table'] != null){
+       specialConcernController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['special_concern'] ?? '';
+        mdpConditionController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['medical_condition'] ?? '';
+        medicationController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['medication'] ?? '';
+        interventionController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['intervention'] ?? '';
+        if (widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['supporting_documents'] != null) {
+                      originalUrl = widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['supporting_documents'].substring(
+                          2, widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['supporting_documents'].length - 2);
+                          encodedUrl = Uri.encodeFull(originalUrl);
+                    }
+      }
+
+       
+
+
+     if(widget.formDetails![0]['db_admission_table']['db_special_concerns_table'].isNotEmpty && widget.formDetails![0]['db_admission_table']['db_special_concerns_table'] != null){
+       specialConcernController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['special_concern'] ?? '';
+        mdpConditionController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['medical_condition'] ?? '';
+        medicationController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['medication'] ?? '';
+        interventionController.text=widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['intervention'] ?? '';
+        if (widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['supporting_documents'] != null) {
+                      originalUrl = widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['supporting_documents'].substring(
+                          2, widget.formDetails![0]['db_admission_table']['db_special_concerns_table'][0]['supporting_documents'].length - 2);
+                          encodedUrl = Uri.encodeFull(originalUrl);
+                    }
+      }
+
+ 
+ 
+ if(widget.formDetails![0]['db_admission_table']['db_family_background_table'].isNotEmpty){
+        if(widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_parent_table'].length>0){
+            for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_parent_table'].length;i++){
+              var parent = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_parent_table'][i];
+              String fullName='${parent['first_name']} ${parent['last_name']}';
+              DateTime dateOfBirth = DateTime.parse(parent['date_of_birth']);
+              DateTime today = DateTime.now();
+              int age = today.year - dateOfBirth.year;
+              if(parent['relationship_to_child']=='mother'){
+                motherNameController.text = fullName;
+                motherAgeController.text = age.toString();
+                motherEduAttainController.text=parent['educational_attainment'];
+                motherEmploymentStatus = parent['employment_status'];
+                motherEmployedAtController.text = parent['employed_at'] ?? '';
+                motherOfficeAddressController.text=parent['office_address'] ?? '';
+                motherContactController.text=parent['contact_no'] ?? '';
+                motherWorkPositionController.text = parent['job_position'] ?? '';
+                motherSalary = parent['salary_scale'] ?? '';
+              }else if(parent['relationship_to_child']=='father'){
+                fatherNameController.text = fullName;
+                fatherAgeController.text = age.toString();
+                fatherEduAttainController.text=parent['educational_attainment'];
+                fatherEmploymentStatus = parent['employment_status'];
+                fatherEmployedAtController.text = parent['employed_at'] ?? '';
+                fatherOfficeAddressController.text=parent['office_address'] ?? '';
+                fatherContactController.text=parent['contact_no'] ?? '';
+                fatherWorkPositionController.text = parent['job_position'] ?? '';
+                fatherSalary = parent['salary_scale'] ?? '';
+              }else if(parent['relationship_to_child']=='guardian'){
+                guardianNameController.text = fullName;
+                guardianAgeController.text = age.toString();
+                guardianEduAttainController.text=parent['educational_attainment'];
+                guardianEmploymentStatus = parent['employment_status']??'';
+                guardianEmployedAtController.text = parent['employed_at'] ?? '';
+                guardianOfficeAddressController.text=parent['office_address'] ?? '';
+                guardianContactController.text=parent['contact_no'] ?? '';
+                guardianWorkPositionController.text = parent['job_position'] ?? '';
+                guardianRelationTo = parent['relationship_to_child'] ?? '';
+                guardianSalary = parent['salary_scale'] ?? '';
+              }
+            }
+        }
+    }     
+
+      
+    
   }
+  
 
 
   
@@ -536,7 +580,7 @@ void addItemDescription(double scale) {
     double scale = widthScale < heightScale ? widthScale : heightScale;
 
 
-   addressController.text='${parts[0]}, $districtName, $city, $province';
+   //addressController.text='${parts[0]}, $districtName, $city, $province';
 
 
     return SingleChildScrollView(
@@ -994,21 +1038,51 @@ Expanded(
     //FULLNAME TEXTFIELDS
         Row(
     children: [
-       Expanded(
-        flex: 1,
-        child: SizedBox(
-          height: 40,
-          child: TextField(
-            controller: fnameController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      Expanded(
+  flex: 1,
+  child: SizedBox(
+    height: 40,
+    child: TextField(
+      controller: fnameController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
           ),
         ),
       ),
+    ),
+  ),
+),
+
+
       const SizedBox(width: 8),
       Expanded(
         flex: 1,
@@ -1765,7 +1839,7 @@ SizedBox(
     ),
     onChanged: (String value) {
       updateQuantity();
-      addItemDescription(scale);
+      addItemDescription(double.parse(siblingQuantityController.text));
     },
   ),
 ),
@@ -3320,7 +3394,8 @@ Row(
               SizedBox(
             height: 40,
             child: TextField(
-              enabled: false, 
+              enabled: false,
+              controller: specialConcernController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -3349,7 +3424,8 @@ Row(
               SizedBox(
             height: 40,
             child: TextField(
-              enabled: false, 
+              enabled: false,
+              controller: mdpConditionController, 
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -3379,7 +3455,8 @@ const SizedBox(height: 16),
               SizedBox(
             height: 40,
             child: TextField(
-              enabled: false, 
+              enabled: false,
+              controller: medicationController, 
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -3406,6 +3483,7 @@ const SizedBox(width: 8,),
             height: 40,
             child: TextField(
               enabled: false, 
+              controller: interventionController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -3435,14 +3513,43 @@ const SizedBox(height: 16),
               const SizedBox(height: 8),
               SizedBox(
             height: 40,
-            child: TextField(
+            child: /*TextField(
               enabled: false, 
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ),
+            */ElevatedButton(
+                              onPressed: encodedUrl.isNotEmpty
+                                  ? () async {
+                                      // Ensure imagePath is a valid URL
+
+                                      // Use the browser's built-in window.open method
+                                      try {
+                                        html.window.open(encodedUrl,
+                                            '_blank'); // Open URL in a new tab
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Could not open the link')),
+                                        );
+                                      }
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff012169),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              child: const Text(
+                                "Open Link",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            )
           ),
             ],
           ),

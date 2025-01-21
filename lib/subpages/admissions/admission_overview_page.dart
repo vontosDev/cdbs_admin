@@ -60,9 +60,15 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
 
 
   String formatDate(DateTime date) {
-    final DateFormat formatter = DateFormat('dd-MM-yyyy HH:mm');
-    return formatter.format(date);
-  }
+  // Convert the UTC date to local time
+  DateTime localDate = date.toLocal();
+
+  // Create a DateFormat object to format the date
+  final DateFormat formatter = DateFormat('dd-MM-yyyy HH:mm');
+
+  // Return the formatted date in local time
+  return formatter.format(localDate);
+}
 
     Color _getStatusColor(String status) {
       if (status.contains('complete') || status.contains('passed')) {
@@ -263,7 +269,7 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
     : '---';
                   bool isComplete = request['db_admission_table']['is_complete_view'];
                   bool isRequired = request['db_admission_table']['is_all_required_file_uploaded'];
-                  bool isPaid = request['db_admission_table']['is_paid'];
+                  bool isPaid = request['db_admission_table']['is_paid'] ?? false;
                   bool isAssess = request['db_admission_table']['is_for_assessment'];
                   bool isResult = request['db_admission_table']['is_final_result'];
                   List<bool> checkboxStates = List.generate(filteredRequest.length, (_) => false);
@@ -532,13 +538,13 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
     // Extracting other flags from the nested db_admission_table structure
     bool isCompleteA = a['db_admission_table']['is_complete_view'];
     bool isRequiredA = a['db_admission_table']['is_all_required_file_uploaded'];
-    bool isPaidA = a['db_admission_table']['is_paid'];
+    bool isPaidA = a['db_admission_table']['is_paid'] ?? false;
     bool isAssessA = a['db_admission_table']['is_for_assessment'];
     bool isResultA = a['db_admission_table']['is_final_result'];
 
     bool isCompleteB = b['db_admission_table']['is_complete_view'];
     bool isRequiredB = b['db_admission_table']['is_all_required_file_uploaded'];
-    bool isPaidB = b['db_admission_table']['is_paid'];
+    bool isPaidB = b['db_admission_table']['is_paid'] ?? false;
     bool isAssessB = b['db_admission_table']['is_for_assessment'];
     bool isResultB = b['db_admission_table']['is_final_result'];
 

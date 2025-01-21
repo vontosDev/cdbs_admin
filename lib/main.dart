@@ -50,7 +50,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -69,12 +68,16 @@ class MyApp extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Color(0XFF012169), width: 2), // Active (focused) border color
+              borderSide: const BorderSide(color: Color(0XFF012169), width: 2), // Focused (active) border color
+              borderRadius: BorderRadius.circular(8),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.black, width: 1), // Disabled border color (set to red)
               borderRadius: BorderRadius.circular(8),
             ),
           ),
           textSelectionTheme: const TextSelectionThemeData(
-            cursorColor: Color(0XFF012169), // Sets the cursor color to green
+            cursorColor: Color(0XFF012169), // Cursor color
           ),
         ),
         initialRoute: '/',
