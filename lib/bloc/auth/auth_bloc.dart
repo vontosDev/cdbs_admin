@@ -16,7 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<http.Response> _login(String email, String password) {
-    String url = 'https://donboscoapi.vercel.app/api/admin/login_account';
+    String url = '$apiUrl/api/admin/login_account';
     return http.post(
       Uri.parse(url),
       headers: {

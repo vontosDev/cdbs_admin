@@ -43177,7 +43177,7 @@ if(!g.b.test(n)){if(!b.d)b.a.$1(new A.jy("Invalid Email address"))
 s=1
 break}if(J.b6(m)<6){if(!b.d)b.a.$1(new A.jy("Password cannot be less than 6 characters"))
 s=1
-break}g=A.c4("https://donboscoapi.vercel.app/api/admin/login_account")
+break}g=A.c4("https://dbs-api-live.vercel.app/api/admin/login_account")
 f=t.N
 e=A.a0(["Content-Type","application/json","supabase-url",u.I,"supabase-key",u.y],f,f)
 s=7
