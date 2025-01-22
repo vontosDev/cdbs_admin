@@ -2421,7 +2421,7 @@ void showUploadDialog(
                                                                           },
                                                                           child:
                                                                               const Text(
-                                                                            "No",
+                                                                            "Cancel",
                                                                             style:
                                                                                 TextStyle(color: Colors.black),
                                                                           ),
