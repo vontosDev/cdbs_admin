@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:html' as html;
 
 class AdmissionPaymentsPage2 extends StatefulWidget {
 
@@ -35,6 +36,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
   String? formattedDate;
   String? docStatus;
   String? refNo;
+  String encodedUrl = '';
 
   List<Map<String, dynamic>> myformDetails=[];
 
@@ -42,6 +44,12 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
   void initState() {
     super.initState();
     myformDetails=widget.formDetails!;
+    String originalUrl = '';
+                  if (myformDetails[0]['db_admission_table']['payment_doc'] != null) {
+                    originalUrl = myformDetails[0]['db_admission_table']['payment_doc'].substring(
+                        2, myformDetails[0]['db_admission_table']['payment_doc'].length - 2);
+                  }
+    encodedUrl = Uri.encodeFull(originalUrl);
     refNo= myformDetails[0]['db_admission_table']['reference_no'] ?? '';
     applicationId = myformDetails[0]['db_admission_table']['admission_form_id'];
     fullName='${myformDetails[0]['db_admission_table']['first_name']} ${myformDetails[0]['db_admission_table']['last_name']}';
@@ -108,6 +116,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
               ),
               margin: const EdgeInsets.only(bottom: 20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Second Row
                   Row(
@@ -692,6 +701,37 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 15),
+                  ElevatedButton(
+                              onPressed: encodedUrl.isNotEmpty
+                                  ? () async {
+                                      // Ensure imagePath is a valid URL
+
+                                      // Use the browser's built-in window.open method
+                                      try {
+                                        html.window.open(encodedUrl,
+                                            '_blank'); // Open URL in a new tab
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Could not open the link')),
+                                        );
+                                      }
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff012169),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              child: const Text(
+                                "View proof of payment",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            )
                 ],
               ),
             ),
