@@ -454,7 +454,11 @@ void addItemDescription(double scale) {
       parentStatus=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['parent_status'] ?? '';
       civilWeddingController.text=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['civil_wedding'] ?? '';
       churchNameController.text=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['church_name'] ?? '';
-      for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length;i++){
+      
+     }
+     
+     siblingQuantityController.text=noSibling == 'null' ?'0':noSibling;
+     for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length;i++){
         var sibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'][i];
         String sdate=sibling['sibling_bday'];
         DateTime siblingBday = DateTime.parse(sdate);
@@ -482,10 +486,6 @@ void addItemDescription(double scale) {
       ageController.text=age.toString();
       updateQuantity();
       addItemDescription(widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length);
-     }
-     
-     siblingQuantityController.text=noSibling == 'null' ?'0':noSibling;
-     
      
 
      if(widget.formDetails![0]['db_admission_table']['db_special_concerns_table'].isNotEmpty && widget.formDetails![0]['db_admission_table']['db_special_concerns_table'] != null){
@@ -580,7 +580,7 @@ void addItemDescription(double scale) {
     double scale = widthScale < heightScale ? widthScale : heightScale;
 
 
-   //addressController.text='${parts[0]}, $districtName, $city, $province';
+    addressController.text='${parts[0]}, $districtName, $city, $province';
 
 
     return SingleChildScrollView(
