@@ -3,6 +3,7 @@
 import 'package:cdbs_admin/bloc/admission_bloc/admission_bloc.dart';
 import 'package:cdbs_admin/services/ggx_connection.dart';
 import 'package:cdbs_admin/shared/api.dart';
+import 'package:cdbs_admin/widget/checkbox_readonly.dart';
 import 'package:cdbs_admin/widget/custom_spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +27,14 @@ class AdmissionApplicationsPage2 extends StatefulWidget {
 class _AdmissionApplicationsPage2State
     extends State<AdmissionApplicationsPage2> {
   int _currentPage = 1; // Variable to track the current page (1, 2, or 3)
+  TextEditingController othersController = TextEditingController();
+  Set<String> selectedOptions = {};
+  String heardAboutSchool ='';
+  void onSelectionChanged(Set<String> selected) {
+    setState(() {
+      selectedOptions = selected;
+    });
+  }
 
   void _nextPage() {
     setState(() {
@@ -424,10 +433,10 @@ void addItemDescription(double scale) {
       fetchCityName(cityId);
       fetchProvinceName(provinceId);
     }
+    heardAboutSchool =widget.formDetails![0]['db_admission_table']['db_survey_table'][0]['heard_about_school'];
+    List<String> heardAboutList = heardAboutSchool.split(',');
+    selectedOptions.addAll(heardAboutList);
 
-
-     
-    
      selectedGender =widget.formDetails![0]['db_admission_table']['sex'] ??'';
      fnameController.text=widget.formDetails![0]['db_admission_table']['first_name']??'';
      mnameController.text=widget.formDetails![0]['db_admission_table']['middle_name']??'';
@@ -458,6 +467,7 @@ void addItemDescription(double scale) {
      }
      
      siblingQuantityController.text=noSibling == 'null' ?'0':noSibling;
+
      for(int i=0; i<widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length;i++){
         var sibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'][i];
         String sdate=sibling['sibling_bday'];
@@ -486,6 +496,7 @@ void addItemDescription(double scale) {
       ageController.text=age.toString();
       updateQuantity();
       addItemDescription(widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['db_sibling_table'].length);
+     
      
 
      if(widget.formDetails![0]['db_admission_table']['db_special_concerns_table'].isNotEmpty && widget.formDetails![0]['db_admission_table']['db_special_concerns_table'] != null){
@@ -988,14 +999,42 @@ Expanded(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: levelApplyingController,
-            enabled: isEditable, // Disable or enable based on isEditable
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: levelApplyingController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
 
@@ -1005,14 +1044,42 @@ Expanded(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: schoolYearController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: schoolYearController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1089,14 +1156,42 @@ Expanded(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: mnameController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: mnameController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
       const SizedBox(width: 8),
@@ -1105,14 +1200,42 @@ Expanded(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: lnameController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: lnameController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1207,14 +1330,42 @@ Expanded(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: birthPlaceController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: birthPlaceController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
       const SizedBox(width: 8),
@@ -1223,14 +1374,42 @@ Expanded(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: ageController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: ageController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1375,14 +1554,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: religionController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: religionController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     
@@ -1393,14 +1600,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: citizenshipController,
-            enabled: isEditable, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: citizenshipController,
+      enabled: isEditable,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     
@@ -1470,14 +1705,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: acrController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: acrController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1519,14 +1782,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: addressController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: addressController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1579,14 +1870,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: postalController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: postalController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
       const SizedBox(width: 8),
@@ -1595,14 +1914,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: contactController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: contactController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1678,14 +2025,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: languageSpokenController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: languageSpokenController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
       const SizedBox(width: 8),
@@ -1694,14 +2069,42 @@ Row(
         child: SizedBox(
           height: 40,
           child: TextField(
-            controller: companionController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8 * scale),
-              ),
-            ),
+      controller: companionController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ),
     ],
@@ -1999,14 +2402,42 @@ Row(
           width: 600,
           height: 40,
           child: TextField(
-            controller: fatherNameController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+      controller: fatherNameController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ],
     ),
@@ -2025,14 +2456,42 @@ Row(
           width: 120,
           height: 40,
           child: TextField(
-            controller: fatherAgeController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+      controller: fatherAgeController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ],
     ),
@@ -2051,14 +2510,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: fatherEduAttainController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: fatherEduAttainController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2137,14 +2624,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: fatherEmployedAtController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: fatherEmployedAtController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2164,14 +2679,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: fatherOfficeAddressController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: fatherOfficeAddressController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2197,14 +2740,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: fatherContactController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: fatherContactController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2224,14 +2795,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: fatherWorkPositionController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: fatherWorkPositionController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2336,14 +2935,42 @@ Row(
           width: 600,
           height: 40,
           child: TextField(
-            controller: motherNameController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+      controller: motherNameController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ],
     ),
@@ -2362,14 +2989,42 @@ Row(
           width: 120,
           height: 40,
           child: TextField(
-            controller: motherAgeController,
-            enabled: false, 
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+      controller: motherAgeController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
           ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
         ),
       ],
     ),
@@ -2388,14 +3043,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: motherEduAttainController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: motherEduAttainController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2474,14 +3157,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: motherEmployedAtController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: motherEmployedAtController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2501,14 +3212,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: motherOfficeAddressController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: motherOfficeAddressController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2534,14 +3273,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: motherContactController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: motherContactController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -2561,14 +3328,42 @@ Row(
           SizedBox(
             height: 40,
             child: TextField(
-              controller: motherWorkPositionController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: motherWorkPositionController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
         ],
       ),
@@ -3233,14 +4028,42 @@ const SizedBox(height: 16,),
               SizedBox(
             height: 40,
             child: TextField(
-              controller: civilWeddingController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: civilWeddingController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
             ],
           ),
@@ -3267,14 +4090,42 @@ const SizedBox(height: 16,),
               SizedBox(
             height: 40,
             child: TextField(
-              controller: churchNameController,
-              enabled: false, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: churchNameController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
             ],
                   ),
@@ -3394,14 +4245,42 @@ Row(
               SizedBox(
             height: 40,
             child: TextField(
-              enabled: false,
-              controller: specialConcernController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: specialConcernController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
             ],
           ),
@@ -3424,14 +4303,42 @@ Row(
               SizedBox(
             height: 40,
             child: TextField(
-              enabled: false,
-              controller: mdpConditionController, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: mdpConditionController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
             ],
           ),
@@ -3455,14 +4362,42 @@ const SizedBox(height: 16),
               SizedBox(
             height: 40,
             child: TextField(
-              enabled: false,
-              controller: medicationController, 
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: medicationController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
             ],
           ),
@@ -3482,14 +4417,42 @@ const SizedBox(width: 8,),
                         SizedBox(
             height: 40,
             child: TextField(
-              enabled: false, 
-              controller: interventionController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      controller: interventionController,
+      enabled: false,
+      style: TextStyle(
+        color: isEditable ? const Color(0XFF012169) : Colors.black, // Dynamically change text color
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when enabled
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when focused
+            width: 2.0,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isEditable ? const Color(0XFF012169) : Colors.black, // Match text and border color when disabled
+            width: 1.0,
+          ),
+        ),
+      ),
+    ),
           ),
                       ],
                     ),
@@ -3558,9 +4521,25 @@ const SizedBox(height: 16),
     ),
 
     
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:[
+        const SizedBox(height: 25),
+        Text('Survey',style: TextStyle(fontSize: 20, fontFamily: 'Roboto-R')),
+        const SizedBox(height: 15),
+        Text('How did you first hear about our school?',style: TextStyle(fontSize: 15, fontFamily: 'Roboto-R')),
+        HeardAboutSchoolCheckboxes(
+                heardAboutSchool: heardAboutSchool,  // Pass the default value
+                onSelectionChanged: onSelectionChanged, // Pass the callback
+                othersController: othersController, // Pass the controller for "Others" text field
+              ),
+      ]
+    ),
+
+    
 
 
-const SizedBox(height: 350),
+const SizedBox(height: 120),
 
 
 

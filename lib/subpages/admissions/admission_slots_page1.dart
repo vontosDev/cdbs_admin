@@ -159,6 +159,7 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                       onPressed: () {
                         showDialog(
                           context: context,
+                          barrierDismissible: false,
                           builder: (context) => Dialog(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
@@ -297,6 +298,9 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                                                           context.read<AdmissionBloc>().add(IsLoadingClicked(false));
                                                           Navigator.of(context).popUntil((route) => route.isFirst);
                                                           showMessageDialog(context, 'New slot created', false);
+                                                          setState(() {
+                                                            slotController.text='';
+                                                          });
                                                         } else {
                                                           // Handle failure
                                                           final responseBody = jsonDecode(response.body);
@@ -304,6 +308,9 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                                                           context.read<AdmissionBloc>().add(IsLoadingClicked(false));
                                                           Navigator.of(context).popUntil((route) => route.isFirst);
                                                           showMessageDialog(context, 'Error slot not created', true);
+                                                          setState(() {
+                                                            slotController.text='';
+                                                          });
                                                         }
                                                       } catch (error) {
                                                         // Handle error (e.g., network error)
@@ -311,6 +318,9 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                                                         context.read<AdmissionBloc>().add(IsLoadingClicked(false));
                                                         Navigator.of(context).popUntil((route) => route.isFirst);
                                                         showMessageDialog(context, 'Error in connection', true);
+                                                        setState(() {
+                                                            slotController.text='';
+                                                          });
                                                       }
                                                     },
                                                     style: ElevatedButton.styleFrom( backgroundColor:const Color(0xff012169),

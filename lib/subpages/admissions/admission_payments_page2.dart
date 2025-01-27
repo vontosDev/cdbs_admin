@@ -37,7 +37,6 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
   String? docStatus;
   String? refNo;
   String encodedUrl = '';
-
   List<Map<String, dynamic>> myformDetails=[];
 
   @override
@@ -446,7 +445,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                             const SizedBox(width: 2),
 
                           // Red X Button
-                          if (!isGreenExpanded)
+                          /*if (!isGreenExpanded)
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               width: isRedExpanded ? 99 : 47,
@@ -463,13 +462,13 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                                                                                   'supabase-url': supabaseUrl,
                                                                                   'supabase-key': supabaseKey,
                                                                                 },
-                                                                                body: json.encode({
+                                                                                /*body: json.encode({
                                                                                   'admission_id': myformDetails[0]['db_admission_table']['admission_id'],
                                                                                   'admission_status':'rejected',  // Send customer_id in the request body
                                                                                   'user_id':widget.userId,
                                                                                   'is_paid':false,
                                                                                   'is_done':true
-                                                                                }),
+                                                                                }),*/
                                                                               );
                                                                               
                                                                               
@@ -615,7 +614,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                                   color: Colors.white,
                                 ),
                               ),
-                            ),
+                            ),*/
                         ],
                       ),
                     ],
@@ -671,7 +670,10 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      SizedBox(
+                      const SizedBox(
+                        width: 50,
+                        height: 37),
+                     /* SizedBox(
                         width: 99,
                         height: 37,
                         child: ElevatedButton(
@@ -698,7 +700,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                             ),
                           ),
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                   const SizedBox(height: 15),
