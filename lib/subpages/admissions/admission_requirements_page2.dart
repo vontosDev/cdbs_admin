@@ -2499,7 +2499,7 @@ void showUploadDialog(
             backgroundColor: const Color(0xffffffff),
             content: SizedBox(
                                                           width: 349.0,
-                                                          height: _selectedFiles.isEmpty?272.0:300,
+                                                          height: _selectedFiles.isEmpty?272.0:450,
                                                           child: _isLoading
                                                               ? const CustomSpinner(
                                                                   color: Color(
@@ -2574,9 +2574,13 @@ void showUploadDialog(
                                                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                             children: [
                                                                               // Display file name
-                                                                              Text(
-                                                                                file.name,
-                                                                                style: const TextStyle(color: Color(0xff13322b)),
+                                                                              SizedBox(
+                                                                                width: 250,
+                                                                                child: Text(
+                                                                                  file.name,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                  style: const TextStyle(color: Color(0xff13322b)),
+                                                                                ),
                                                                               ),
                                                                               
                                                                               // Delete icon
@@ -2599,9 +2603,8 @@ void showUploadDialog(
                                                                   ),
                                                                 ),
                                                                 
-                                                                      const SizedBox(
-                                                                          height:
-                                                                              16.0),
+                                                                       SizedBox(  height:
+                                                                              _selectedFiles.isEmpty?16.0:155),
                                                                       // Divider
                                                                       const Padding(
                                                                         padding: EdgeInsets.only(
