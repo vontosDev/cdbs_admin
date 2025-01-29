@@ -300,7 +300,7 @@ String formatDate(DateTime date) {
                                   },
                                   activeColor: const Color(0XFF012169), // Set the active color to pink
                                 ),
-                                Text(
+                                SelectableText(
                                   request['db_admission_table']['admission_form_id'].toString(),
                                   style: TextStyle(fontSize: 16 * scale),
                                 ),
@@ -309,21 +309,21 @@ String formatDate(DateTime date) {
                           ),
                     Expanded(
                       flex: 3,
-                      child: Text(
+                      child: SelectableText(
                         fullName,
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
                     ),
                     Expanded(
                       flex: 2,
-                      child: Text(
+                      child: SelectableText(
                         processBy,
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
                     ),
                     Expanded(
                       flex: 2,
-                      child: Text(
+                      child: SelectableText(
                         request['db_admission_table']['is_final_result']?'COMPLETE':request['db_admission_table']['admission_status'],
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale,
                         color: request['db_admission_table']['is_final_result']?const Color(0xFF007A33):_getStatusColor(request['db_admission_table']['admission_status']),
@@ -332,7 +332,7 @@ String formatDate(DateTime date) {
                     ),
                     Expanded(
                       flex: 2,
-                      child: Text(
+                      child: SelectableText(
                         formattedDate,
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),

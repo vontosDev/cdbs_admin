@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
@@ -105,6 +106,32 @@ class _AdmissionRequirementsPage2State
     }
   }
 
+
+  void openUrlsInSameTab(List<String> urls) {
+  try {
+    // Create an iframe to display the first document
+    var iframe = html.IFrameElement();
+    iframe.src = urls.first; // Set the first URL
+    iframe.width = '100%';
+    iframe.height = '100vh';
+    html.document.body!.children.add(iframe); // Add iframe to the body
+
+    // After viewing the first URL, switch to the next one
+    for (var i = 1; i < urls.length; i++) {
+      // Update the iframe's source to the next URL
+      iframe.src = urls[i];
+    }
+  } catch (e) {
+    // If an error occurs, show a SnackBar with the error message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not open the link'),
+      ),
+    );
+  }
+}
+
+
   /*Future<void> _pickFiles(StateSetter setState) async {
   try {
     final result = await FilePicker.platform.pickFiles(
@@ -126,7 +153,7 @@ class _AdmissionRequirementsPage2State
   }
 }*/
 
-Future<void> _pickFiles(StateSetter setState) async {
+/*Future<void> _pickFiles(StateSetter setState) async {
   try {
     // Create the file upload input element
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
@@ -154,6 +181,55 @@ Future<void> _pickFiles(StateSetter setState) async {
   } catch (e) {
     print('Error picking files: $e');
   }
+}*/
+
+Future<void> _pickFiles(StateSetter setState) async {
+  try {
+    // Create the file upload input element
+    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+    uploadInput.accept = '.pdf'; // Accept PDF files only
+    uploadInput.multiple = true; // Allow multiple files
+
+    uploadInput.click(); // Trigger the file picker dialog
+
+    // Listen for the file selection
+    uploadInput.onChange.listen((e) async {
+      final files = uploadInput.files;
+      if (files != null && files.isNotEmpty) {
+        // Create a list to store PlatformFile objects
+        List<PlatformFile> selectedFiles = [];
+
+        // Loop through each file and read its bytes
+        for (var file in files) {
+          // Use FileReader to read file content as bytes
+          final reader = html.FileReader();
+          reader.readAsArrayBuffer(file); // Read as ArrayBuffer (Uint8List)
+          
+          await reader.onLoadEnd.first; // Wait for the file to be fully loaded
+
+          if (reader.result != null) {
+            // Convert ArrayBuffer to Uint8List
+            final bytes = reader.result as Uint8List;
+            
+            // Create PlatformFile object with the bytes and other properties
+            selectedFiles.add(PlatformFile(
+              name: file.name,
+              size: file.size,
+              bytes: bytes, // Assign the file bytes
+              path: null,   // Path is not available in web
+            ));
+          }
+        }
+
+        // Update the selected files in the state
+        setState(() {
+          _selectedFiles = selectedFiles;
+        });
+      }
+    });
+  } catch (e) {
+    print('Error picking files: $e');
+  }
 }
 
 
@@ -169,7 +245,7 @@ Future<void> _pickFiles(StateSetter setState) async {
   }
 
 
-  Future<bool> _uploadRecommendation(
+/*Future<bool> _uploadRecommendation(
   String requirementsType,
   String admissionId,
   String bucketName,
@@ -202,7 +278,7 @@ Future<void> _pickFiles(StateSetter setState) async {
           }
 
           request.files.add(http.MultipartFile.fromBytes(
-            'file',
+            'files',
             fileBytes,
             filename: file.name,
             contentType: MediaType.parse(mimeType),
@@ -235,6 +311,95 @@ Future<void> _pickFiles(StateSetter setState) async {
     print('Unexpected error: $e');
     return false;
   }
+}*/
+
+Future<bool> _uploadRecommendation(
+  String requirementsType,
+  String admissionId,
+  String bucketName,
+  String requiredDocId,
+) async {
+  try {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$apiUrl/api/admin/upload_requirements'),
+    );
+
+    // Adding headers
+    request.headers.addAll({
+      'supabase-url': supabaseUrl,
+      'supabase-key': supabaseKey,
+    });
+
+    // Add form fields
+    request.fields['requirements_type'] = requirementsType;
+    request.fields['admission_id'] = admissionId;
+    request.fields['required_doc_id'] = requiredDocId;
+    request.fields['bucket_name'] = bucketName;
+
+    // Add files
+    for (var file in _selectedFiles!) {
+      try {
+        final fileBytes = await _getFileBytes(file);
+        if (fileBytes != null) {
+          // Log file size before uploading
+          print('File size before upload for ${file.name}: ${fileBytes.length} bytes');
+
+          final mimeType = _getMimeType(file.extension ?? '');
+          if (mimeType == null) {
+            print('Unsupported file type: ${file.extension}');
+            continue;
+          }
+
+          // URL encode the file name to prevent special character issues
+          String encodedFileName = encodeFileName(file.name);
+
+          // Add the file to the request
+          var multipartFile = http.MultipartFile.fromBytes(
+            'files', 
+            fileBytes,
+            filename: encodedFileName, // URL-encoded filename
+            contentType: MediaType.parse(mimeType),
+          );
+
+          // Add to request
+          request.files.add(multipartFile);
+        } else {
+          print('Error reading file bytes for ${file.name}');
+        }
+      } catch (e) {
+        print('Error processing file ${file.name}: $e');
+      }
+    }
+
+    // Send the request with an increased timeout
+    var response = await request.send().timeout(const Duration(seconds: 30)); // Increased timeout
+
+    // Handle the response
+    if (response.statusCode == 200) {
+      final responseData = await response.stream.bytesToString();
+      final data = json.decode(responseData);
+      print('Upload successful: $data');
+      return true;
+    } else {
+      // If upload fails, log the response data
+      final responseData = await response.stream.bytesToString();
+      final data = json.decode(responseData);
+      print('Upload failed with status ${response.statusCode}: ${data['error'] ?? data}');
+      return false;
+    }
+  } on TimeoutException {
+    print('The request timed out. Please try again later.');
+    return false;
+  } catch (e) {
+    print('Unexpected error: $e');
+    return false;
+  }
+}
+
+// Ensure the file name is properly URL-encoded to handle special characters
+String encodeFileName(String fileName) {
+  return Uri.encodeComponent(fileName);
 }
 
 String? _getMimeType(String extension) {
@@ -251,7 +416,48 @@ String? _getMimeType(String extension) {
   }
 }
 
-  Future<Uint8List> _getFileBytes(PlatformFile file) async {
+// Example method to fetch file bytes
+
+Future<Uint8List?> _getFileBytes(PlatformFile file) async {
+  final reader = html.FileReader();
+  final completer = Completer<Uint8List>();
+
+  // Check if file bytes are available and valid
+  if (file.bytes == null || file.bytes!.isEmpty) {
+    print('File bytes are empty or null for ${file.name}');
+    return null; // Return null if no bytes
+  }
+
+  // Create a Blob from the file's bytes
+  final blob = html.Blob([file.bytes!]);
+
+  // Read the Blob as an ArrayBuffer
+  reader.readAsArrayBuffer(blob);
+
+  // Handle the load and error events
+  reader.onLoadEnd.listen((e) {
+    final result = reader.result;
+    if (result != null) {
+      print('File read successfully: ${(result as Uint8List).length} bytes');
+      completer.complete(result as Uint8List);
+    } else {
+      print('Failed to read file data for ${file.name}');
+      completer.completeError('Error reading file data');
+    }
+  });
+
+  reader.onError.listen((e) {
+    print('Error while reading file ${file.name}: ${e}');
+    completer.completeError('Error reading file data');
+  });
+
+  return completer.future;
+}
+
+
+
+
+  /*Future<Uint8List> _getFileBytes(PlatformFile file) async {
     final reader = html.FileReader();
     final completer = Completer<Uint8List>();
 
@@ -265,7 +471,7 @@ String? _getMimeType(String extension) {
     });
 
     return completer.future;
-  }
+  }*/
 
   
 
@@ -463,7 +669,7 @@ String? _getMimeType(String extension) {
                                       // Ensure imagePath is a valid URL
 
                                       // Use the browser's built-in window.open method
-                                      try {
+                                     /* try {
                                         html.window.open(encodedUrl,
                                             '_blank'); // Open URL in a new tab
                                       } catch (e) {
@@ -472,6 +678,21 @@ String? _getMimeType(String extension) {
                                           const SnackBar(
                                               content: Text(
                                                   'Could not open the link')),
+                                        );
+                                      }*/
+                                      List<String> urls = List<String>.from(json.decode(document[index]['document_url']));
+          
+                                      try {
+                                        for (var url in urls) {
+                                          // Open each URL in a new tab
+                                          html.window.open(url, '_blank');
+                                        }
+                                      } catch (e) {
+                                        // If an error occurs, show a SnackBar with the error message
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Could not open the link'),
+                                          ),
                                         );
                                       }
                                     }
@@ -2286,223 +2507,228 @@ void showUploadDialog(
                                                                   size:
                                                                       60.0, // Change the size of the spinner if needed
                                                                 )
-                                                              : Column(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    // Title
-                                                                    const Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          top:
-                                                                              16.0,
-                                                                          bottom:
-                                                                              8.0),
-                                                                      child:
-                                                                          Text(
-                                                                        "Upload Recommendation File",
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontFamily:
-                                                                              'Roboto',
-                                                                          fontSize:
-                                                                              20,
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                        ),
-                                                                        textAlign:
-                                                                            TextAlign.center,
-                                                                      ),
-                                                                    ),
-                                                                    // Content
-                                                                     Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-  child: Column(
-    children: [
-      SizedBox(
-        width: 200,
-        height: 40,
-        child: ElevatedButton(
-          onPressed: _selectedFiles.isEmpty? () {
-            _pickFiles(setState);  // Open the file picker
-          }:null,
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            backgroundColor: _selectedFiles.isEmpty?const Color(0xff012169): Color(0xffD3D3D3),
-          ),
-          child:  Text(
-            'Select File',
-            style: TextStyle(color: _selectedFiles.isEmpty?const Color(0xffffffff):const Color(0xff000000)),
-          ),
-        ),
-      ),
-
-      // Only show files if _selectedFiles is not empty
-      if (_selectedFiles.isNotEmpty) const SizedBox(height: 30),
-
-      // Iterate over the selected files and display each with a delete button
-      if (_selectedFiles.isNotEmpty)
-        ..._selectedFiles.map((file) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Display file name
-              Text(
-                file.name,
-                style: const TextStyle(color: Color(0xff13322b)),
-              ),
-              
-              // Delete icon
-              IconButton(
-                icon: const Icon(
-                  Icons.delete,
-                  color: Color(0xff13322b),
-                ),
-                onPressed: () {
-                  // Remove the file from the list
-                  setState(() {
-                    _selectedFiles =[];
-                  });
-                },
-              ),
-            ],
-          );
-        }).toList(),
-    ],
-  ),
-),
-
-                                                                    const SizedBox(
-                                                                        height:
-                                                                            16.0),
-                                                                    // Divider
-                                                                    const Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          left:
-                                                                              20,
-                                                                          right:
-                                                                              20),
-                                                                      child: Divider(
-                                                                          thickness:
-                                                                              1),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                        height:
-                                                                            16.0),
-                                                                    // No Button
-                                                                    Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                          horizontal:
-                                                                              30.0),
-                                                                      child:
-                                                                          SizedBox(
-                                                                        width:
-                                                                            289,
-                                                                        height:
-                                                                            35,
+                                                              : SingleChildScrollView(
+                                                                child: Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      // Title
+                                                                      const Padding(
+                                                                        padding: EdgeInsets.only(
+                                                                            top:
+                                                                                16.0,
+                                                                            bottom:
+                                                                                8.0),
                                                                         child:
-                                                                            TextButton(
+                                                                            Text(
+                                                                          "Upload Recommendation File",
                                                                           style:
-                                                                              TextButton.styleFrom(
-                                                                            backgroundColor:
-                                                                                const Color(0xffD3D3D3), // No button color
-                                                                            shape:
-                                                                                RoundedRectangleBorder(
-                                                                              borderRadius: BorderRadius.circular(8),
-                                                                            ),
+                                                                              TextStyle(
+                                                                            fontFamily:
+                                                                                'Roboto',
+                                                                            fontSize:
+                                                                                20,
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
                                                                           ),
-                                                                          onPressed:
-                                                                              () {
-                                                                                _selectedFiles=[];
-                                                                            Navigator.of(context).pop(); // Close dialog
-                                                                          },
-                                                                          child:
-                                                                              const Text(
-                                                                            "Cancel",
-                                                                            style:
-                                                                                TextStyle(color: Colors.black),
-                                                                          ),
+                                                                          textAlign:
+                                                                              TextAlign.center,
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                        height:
-                                                                            12.0), // Spacing between buttons
-                                                                    // Yes Button
-                                                                    Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                          horizontal:
-                                                                              30.0),
-                                                                      child:
-                                                                          SizedBox(
-                                                                        width:
-                                                                            289,
-                                                                        height:
-                                                                            35,
-                                                                        child:
-                                                                            TextButton(
-                                                                          style:
-                                                                              TextButton.styleFrom(
-                                                                            backgroundColor:_selectedFiles.isNotEmpty?
-                                                                                const Color(0xff012169):  Color(0xffD3D3D3), // Amber button color
-                                                                            shape:
-                                                                                RoundedRectangleBorder(
-                                                                              borderRadius: BorderRadius.circular(8),
-                                                                            ),
-                                                                          ),
-                                                                          onPressed: _selectedFiles.isNotEmpty? () async {
-                                                                             try{
-                                                                                if(_selectedFiles.isEmpty){
-                                                                                  _showMessage('Please select a recommendation file to upload', "Error: File upload is required");
-                                                                                  setState(() {
-                                                                                    _selectedFiles = [];
-                                                                                  });
-                                                                                }else{
-                                                                                  setState(() {
-                                                                                    _isLoading = true; // Start loading
-                                                                                  });
-                                                                                  bool isStated = await _uploadRecommendation(
-                                                                                    request['requirements_type'].toString(),
-                                                                                    request['admission_id'].toString(),
-                                                                                    'document_upload',
-                                                                                    request['required_doc_id'].toString()
-                                                                                  );
-
-                                                                                  setState(() {
-                                                                                    _selectedFiles = [];
-                                                                                    _isLoading = false; // Stop loading
-                                                                                  });
-                                                                                    
-                                                                                  if (isStated) {
-                                                                                    updateData(request['admission_id']);
-                                                                                    Navigator.of(context).popUntil((route) => route.isFirst);
-                                                                                    _showMessage('Recommendation for: ${request['admission_id']} has been uploaded',
-                                                                                        'Upload Completed');
-                                                                                  } else {
-                                                                                    Navigator.of(context).popUntil((route) => route.isFirst);
-                                                                                    _showMessage('Failed to upload file',
-                                                                                        'Error');
-                                                                                  }
-                                                                                }
-                                                                              }catch(error){
-                                                                                _showMessage('Connection timeout', "Error: File upload failed");
-                                                                              }
+                                                                      // Content
+                                                                       Padding(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                                                  child: Column(
+                                                                    children: [
+                                                                      SizedBox(
+                                                                        width: 200,
+                                                                        height: 40,
+                                                                        child: ElevatedButton(
+                                                                          onPressed: _selectedFiles.isEmpty? () {
+                                                                            _pickFiles(setState);  // Open the file picker
                                                                           }:null,
-                                                                          child:
-                                                                               Text(
-                                                                            "Upload",
-                                                                            style:
-                                                                                TextStyle(color: _selectedFiles.isNotEmpty? Colors.white:const Color(0xff000000)),
+                                                                          style: ElevatedButton.styleFrom(
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(5),
+                                                                            ),
+                                                                            backgroundColor: _selectedFiles.isEmpty?const Color(0xff012169): Color(0xffD3D3D3),
+                                                                          ),
+                                                                          child:  Text(
+                                                                            'Select File',
+                                                                            style: TextStyle(color: _selectedFiles.isEmpty?const Color(0xffffffff):const Color(0xff000000)),
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  ],
+                                                                
+                                                                      // Only show files if _selectedFiles is not empty
+                                                                      if (_selectedFiles.isNotEmpty) const SizedBox(height: 30),
+                                                                
+                                                                      // Iterate over the selected files and display each with a delete button
+                                                                      if (_selectedFiles.isNotEmpty)
+                                                                        ..._selectedFiles.asMap().entries.map((entry) {
+                                                                          int index = entry.key; // This is the index of the file
+                                                                          var file = entry.value; // This is the file at the current index
+                                                                          
+                                                                          return Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              // Display file name
+                                                                              Text(
+                                                                                file.name,
+                                                                                style: const TextStyle(color: Color(0xff13322b)),
+                                                                              ),
+                                                                              
+                                                                              // Delete icon
+                                                                              IconButton(
+                                                                                icon: const Icon(
+                                                                                  Icons.delete,
+                                                                                  color: Color(0xff13322b),
+                                                                                ),
+                                                                                onPressed: () {
+                                                                                  // Remove the file from the list at the current index
+                                                                                  setState(() {
+                                                                                    _selectedFiles.removeAt(index);
+                                                                                  });
+                                                                                },
+                                                                              ),
+                                                                            ],
+                                                                          );
+                                                                        }).toList(),
+                                                                    ],
+                                                                  ),
                                                                 ),
+                                                                
+                                                                      const SizedBox(
+                                                                          height:
+                                                                              16.0),
+                                                                      // Divider
+                                                                      const Padding(
+                                                                        padding: EdgeInsets.only(
+                                                                            left:
+                                                                                20,
+                                                                            right:
+                                                                                20),
+                                                                        child: Divider(
+                                                                            thickness:
+                                                                                1),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                          height:
+                                                                              16.0),
+                                                                      // No Button
+                                                                      Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                30.0),
+                                                                        child:
+                                                                            SizedBox(
+                                                                          width:
+                                                                              289,
+                                                                          height:
+                                                                              35,
+                                                                          child:
+                                                                              TextButton(
+                                                                            style:
+                                                                                TextButton.styleFrom(
+                                                                              backgroundColor:
+                                                                                  const Color(0xffD3D3D3), // No button color
+                                                                              shape:
+                                                                                  RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(8),
+                                                                              ),
+                                                                            ),
+                                                                            onPressed:
+                                                                                () {
+                                                                                  _selectedFiles=[];
+                                                                              Navigator.of(context).pop(); // Close dialog
+                                                                            },
+                                                                            child:
+                                                                                const Text(
+                                                                              "Cancel",
+                                                                              style:
+                                                                                  TextStyle(color: Colors.black),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                          height:
+                                                                              12.0), // Spacing between buttons
+                                                                      // Yes Button
+                                                                      Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                30.0),
+                                                                        child:
+                                                                            SizedBox(
+                                                                          width:
+                                                                              289,
+                                                                          height:
+                                                                              35,
+                                                                          child:
+                                                                              TextButton(
+                                                                            style:
+                                                                                TextButton.styleFrom(
+                                                                              backgroundColor:_selectedFiles.isNotEmpty?
+                                                                                  const Color(0xff012169):  Color(0xffD3D3D3), // Amber button color
+                                                                              shape:
+                                                                                  RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(8),
+                                                                              ),
+                                                                            ),
+                                                                            onPressed: _selectedFiles.isNotEmpty? () async {
+                                                                               try{
+                                                                                  if(_selectedFiles.isEmpty){
+                                                                                    _showMessage('Please select a recommendation file to upload', "Error: File upload is required");
+                                                                                    setState(() {
+                                                                                      _selectedFiles = [];
+                                                                                    });
+                                                                                  }else{
+                                                                                    setState(() {
+                                                                                      _isLoading = true; // Start loading
+                                                                                    });
+                                                                                    bool isStated = await _uploadRecommendation(
+                                                                                      request['requirements_type'].toString(),
+                                                                                      request['admission_id'].toString(),
+                                                                                      'document_upload',
+                                                                                      request['required_doc_id'].toString()
+                                                                                    );
+                                                                
+                                                                                    setState(() {
+                                                                                      _selectedFiles = [];
+                                                                                      _isLoading = false; // Stop loading
+                                                                                    });
+                                                                                      
+                                                                                    if (isStated) {
+                                                                                      updateData(request['admission_id']);
+                                                                                      Navigator.of(context).popUntil((route) => route.isFirst);
+                                                                                      _showMessage('Recommendation for: ${request['admission_id']} has been uploaded',
+                                                                                          'Upload Completed');
+                                                                                    } else {
+                                                                                      Navigator.of(context).popUntil((route) => route.isFirst);
+                                                                                      _showMessage('Failed to upload file',
+                                                                                          'Error');
+                                                                                    }
+                                                                                  }
+                                                                                }catch(error){
+                                                                                  _showMessage('Connection timeout', "Error: File upload failed");
+                                                                                }
+                                                                            }:null,
+                                                                            child:
+                                                                                 Text(
+                                                                              "Upload",
+                                                                              style:
+                                                                                  TextStyle(color: _selectedFiles.isNotEmpty? Colors.white:const Color(0xff000000)),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                              ),
                                                         ),
             
           );

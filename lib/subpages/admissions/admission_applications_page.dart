@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cdbs_admin/bloc/admission_bloc/admission_bloc.dart';
 import 'package:cdbs_admin/bloc/auth/auth_bloc.dart';
 import 'package:cdbs_admin/class/admission_forms.dart';
@@ -9,7 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
+import 'dart:html' as html;
+import 'package:excel/excel.dart' hide Border;
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 
 class AdmissionApplicationsPage extends StatefulWidget {
@@ -104,6 +108,10 @@ String formatDate(DateTime date) {
   // Return the formatted date in local time
   return formatter.format(localDate);
 }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -210,6 +218,25 @@ String formatDate(DateTime date) {
                   ),
                 ),
                 const Spacer(),
+                ElevatedButton(
+                    onPressed: ()=> _saveExcel(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff012169),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Text(
+                      'Export to Sheets',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Roboto-R',
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 15),
                 SizedBox(
                   width: 226 * scale,
                   height: 32 * scale,
@@ -317,7 +344,7 @@ String formatDate(DateTime date) {
                                   },
                                   activeColor: const Color(0XFF012169), // Set the active color to pink
                                 ),
-                                Text(
+                                SelectableText(
                                   request['db_admission_table']['admission_form_id'].toString(),
                                   style: TextStyle(fontSize: 16 * scale),
                                 ),
@@ -326,26 +353,26 @@ String formatDate(DateTime date) {
                           ),
                           Expanded(
                             flex: 3,
-                            child: Text(fullName,
+                            child: SelectableText(fullName,
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
                           ),
                           Expanded(
                             flex: 2,
-                            child: Text(processBy,
+                            child: SelectableText(processBy,
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
                           ),
                           Expanded(
                             flex: 2,
-                            child: Text(!request['db_admission_table']['is_complete_view']?request['db_admission_table']['admission_status'].toString().toUpperCase():"COMPLETE",
+                            child: SelectableText(!request['db_admission_table']['is_complete_view']?request['db_admission_table']['admission_status'].toString().toUpperCase():"COMPLETE",
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale, 
                               color: request['db_admission_table']['is_complete_view']?const Color(0xFF007A33):_getStatusColor(request['db_admission_table']['admission_status'])),
                             ),
                           ),
                           Expanded(
                             flex: 2,
-                            child: Text(formattedDate,
+                            child: SelectableText(formattedDate,
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
                           ),
@@ -924,6 +951,66 @@ int _getSortOrder(bool isComplete) {
   } else {
     return 1; // Second group: complete statuses will come later.
   }
+}
+
+
+Future<void> _saveExcel(BuildContext context) async {
+  var excel = Excel.createExcel();  // Create a new Excel file
+  Sheet sheetObject = excel['Sheet1'];  // Get the first sheet
+
+  // Add header row (ensure you're using CellValue for each string)
+  sheetObject.appendRow([
+    'Applicant ID',
+    'Applicant Name (Last Name, First Name, Middle Name)',
+    'Handled By',
+    'Status',
+    'Date Created',
+  ]);
+
+  // Add sample data to Excel (populate from your `filteredRequest`)
+  for (var trackingData in filteredRequest) {
+    final fullName = '${capitalizeEachWord(trackingData['db_admission_table']['last_name'])}, ${capitalizeEachWord(trackingData['db_admission_table']['first_name'])} ${capitalizeEachWord(trackingData['db_admission_table']['middle_name'])}';
+    final processBy = trackingData['db_admission_table']['db_admission_form_handler_table'].isNotEmpty
+        ? '${trackingData['db_admission_table']['db_admission_form_handler_table'][0]['db_admin_table']['first_name']} ${trackingData['db_admission_table']['db_admission_form_handler_table'][0]['db_admin_table']['last_name']}'
+        : '---';
+
+    String dateCreatedString = trackingData['db_admission_table']['created_at'];
+    DateTime dateCreated = DateTime.parse(dateCreatedString);
+    String formattedDate = formatDate(dateCreated);
+
+    sheetObject.appendRow([
+      trackingData['db_admission_table']['admission_form_id'].toString() ?? '',
+      fullName ?? '',
+      processBy ?? '',
+      !trackingData['db_admission_table']['is_complete_view']
+          ? trackingData['db_admission_table']['admission_status'].toString().toUpperCase()
+          : "COMPLETE",
+      formattedDate ?? ''
+    ]);
+  }
+
+  // Convert the Excel file to bytes
+  final excelBytes = excel.save()!;
+
+  // Create a Blob from the byte array
+  final blob = html.Blob([excelBytes]);
+
+  // Create an anchor element to initiate the download
+  final url = html.Url.createObjectUrlFromBlob(blob);
+  final anchor = html.AnchorElement(href: url)
+    ..target = 'blank'
+    ..download = 'applicant.xlsx'; // Set the default file name
+
+  // Trigger the click event to start the download
+  anchor.click();
+
+  // Revoke the object URL after download
+  html.Url.revokeObjectUrl(url);
+
+  // Show a SnackBar or a message that the file is saved
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Excel file downloaded successfully!')),
+  );
 }
 
 }

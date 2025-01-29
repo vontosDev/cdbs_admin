@@ -341,7 +341,7 @@ const SizedBox(height: 40),
                                   },
                                   activeColor: const Color(0XFF012169), // Set the active color to pink
                                 ),
-                                Text(
+                                SelectableText(
                                   request['db_admission_table']['admission_form_id'].toString(),
                                   style: TextStyle(fontSize: 16 * scale),
                                 ),
@@ -350,28 +350,28 @@ const SizedBox(height: 40),
                           ),
                     Expanded(
                       flex: 2,
-                      child: Text(
+                      child: SelectableText(
                         fullName,
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
                     ),
                     Expanded(
                       flex: 2,
-                      child: Text(
+                      child: SelectableText(
                         processBy,
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
                     ),
                     Expanded(
                       flex: 2,
-                      child: Text(!isPaid?stat=='complete' && isRequired?'PENDING':stat.toUpperCase():'COMPLETE',
+                      child: SelectableText(!isPaid?stat=='complete' && isRequired?'PENDING':stat.toUpperCase():'COMPLETE',
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale,
                         color: isPaid?const Color(0xFF007A33):_getStatusColor(request['db_admission_table']['admission_status'])),
                       ),
                     ),
                     Expanded(
                       flex: 2,
-                      child: Text(
+                      child: SelectableText(
                         formattedDate,
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                       ),
