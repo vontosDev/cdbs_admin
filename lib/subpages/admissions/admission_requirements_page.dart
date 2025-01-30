@@ -173,7 +173,7 @@ String formatDate(DateTime date) {
                   );
                 }
                 requests = snapshot.data ?? []; // Use the data from the snapshot
-                filteredRequest = sortRequests(requests);
+                filteredRequest = sortRequests(requests, authState.adminType);
                 filteredRequest = filteredRequest.where((request) {
                         final formId = request['db_admission_table']['admission_form_id']?.toLowerCase() ?? '';
                         return formId.contains(searchQuery);
@@ -946,7 +946,15 @@ String formatDate(DateTime date) {
     );
   }
 
-  List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests) {
+  List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests, String adminType) {
+
+    if (adminType == 'Cashier') {
+    requests = requests.where((request) {
+      return request['db_admission_table']['is_all_required_file_uploaded'] == true;
+    }).toList();
+  }
+
+
   requests.sort((a, b) {
     // Extract the admission statuses
     String admissionStatusA = a['db_admission_table']['admission_status'] ?? '';
