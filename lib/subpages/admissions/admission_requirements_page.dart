@@ -432,6 +432,7 @@ String formatDate(DateTime date) {
                                             body: json.encode({
                                               'admission_id': request['admission_id'],
                                               'admission_status':'in review',  // Send customer_id in the request body
+                                              'is_admin_reviewing':true,
                                               'user_id':authState.uid
                                             }),
                                           );
@@ -529,8 +530,34 @@ String formatDate(DateTime date) {
           TextButton.icon(
             onPressed: () {
               context.read<AdmissionBloc>().add(MarkAsCompleteClicked(false));
-              setState(() {
+              setState(()async {
                 _selectedAction = 0; // Go back to default content
+                try {
+                                          final response = await http.post(
+                                            Uri.parse('$apiUrl/api/admin/update_admission'),
+                                            headers: {
+                                              'Content-Type': 'application/json',
+                                              'supabase-url': supabaseUrl,
+                                              'supabase-key': supabaseKey,
+                                            },
+                                            body: json.encode({
+                                              'admission_id': details[0]['admission_id'],
+                                              'is_admin_reviewing':false,
+                                              'user_id':userId
+                                            }),
+                                          );
+
+                                          if (response.statusCode == 200) {
+                                            final responseBody = jsonDecode(response.body);
+                                          } else {
+                                            // Handle failure
+                                            final responseBody = jsonDecode(response.body);
+                                            print('Error: ${responseBody['error']}');
+                                          }
+                                        } catch (error) {
+                                          // Handle error (e.g., network error)
+                                          print('Error: $error');
+                                        }
               });
             },
             icon: const Icon(Icons.arrow_back, color: Colors.black),
