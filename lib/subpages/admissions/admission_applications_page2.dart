@@ -296,9 +296,9 @@ void addItemDescription(double scale) {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Name*',
-                              style: TextStyle(fontSize: 11 * scale, fontFamily: 'Roboto-R'), // Adjust font size as needed
+                              style: TextStyle(fontSize: 14, fontFamily: 'Roboto-R'), // Adjust font size as needed
                             ),
                             const SizedBox(height: 8),
                             SizedBox(
@@ -321,9 +321,9 @@ void addItemDescription(double scale) {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Age*',
-                              style: TextStyle(fontSize: 11 * scale, fontFamily: 'Roboto-R'),
+                              style: TextStyle(fontSize: 14, fontFamily: 'Roboto-R'),
                             ),
                             const SizedBox(height: 8),
                             SizedBox(
@@ -347,9 +347,9 @@ void addItemDescription(double scale) {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Grade Level/ Course/ Occupation*',
-                                style: TextStyle(fontSize: 11 * scale, fontFamily: 'Roboto-R'),
+                                style: TextStyle(fontSize: 14, fontFamily: 'Roboto-R'),
                               ),
                               const SizedBox(height: 8),
                               SizedBox(
@@ -373,9 +373,9 @@ void addItemDescription(double scale) {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'School/ Business Office*',
-                                style: TextStyle(fontSize: 11 * scale, fontFamily: 'Roboto-R'),
+                                style: TextStyle(fontSize: 14, fontFamily: 'Roboto-R'),
                               ),
                               const SizedBox(height: 8),
                               SizedBox(
