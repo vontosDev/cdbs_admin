@@ -428,7 +428,7 @@ Future<bool> _uploadRecommendation(
     }
 
     // Send the request with an increased timeout
-    var response = await request.send().timeout(const Duration(seconds: 30)); // Increased timeout
+    var response = await request.send().timeout(const Duration(seconds: 60)); // Increased timeout
 
     // Handle the response
     if (response.statusCode == 200) {
@@ -798,7 +798,7 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
                                         fontSize: 14 * scale),
                                   )),
                               const SizedBox(width: 40),
-                              authState.adminType=='Admin' || authState.adminType=='Principal' || authState.adminType=='IT' || authState.adminType=='Sisters' || authState.adminType=='Center for Learner Wellness'?
+                              authState.adminType=='Admin' || authState.adminType=='Principal' || authState.adminType=='Registrar' || authState.adminType=='IT' || authState.adminType=='Sisters' || authState.adminType=='Center for Learner Wellness'?
                               Expanded(
                                   flex: 2,
                                   child: Row(
@@ -2800,15 +2800,21 @@ void showUploadDialog(
                                                                                   if (isStated) {
                                                                                     updateData(request['admission_id']);
                                                                                     Navigator.of(context).popUntil((route) => route.isFirst);
+                                                                                    _selectedFiles = [];
+                                                                                    isSelect=false;
                                                                                     _showMessage('Recommendation for: ${request['admission_id']} has been uploaded',
                                                                                         'Upload Completed');
                                                                                   } else {
                                                                                     Navigator.of(context).popUntil((route) => route.isFirst);
-                                                                                    _showMessage('Failed to upload file',
+                                                                                    _selectedFiles = [];
+                                                                                    isSelect=false;
+                                                                                    _showMessage('File upload failed. The file size exceeds the 4 MB limit. Please ensure the file is under 4 MB in size.',
                                                                                         'Error');
                                                                                   }
                                                                                 }
                                                                               }catch(error){
+                                                                                _selectedFiles = [];
+                                                                                isSelect=false;
                                                                                 _showMessage('Connection timeout', "Error: File upload failed");
                                                                               }
                                                                           }:null,

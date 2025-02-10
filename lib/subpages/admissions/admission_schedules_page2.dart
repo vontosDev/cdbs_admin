@@ -26,6 +26,10 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
   String? formattedExamDate;
 
 
+  List<Map<String, dynamic>> cancelledSchedules = [];
+  List<Map<String, dynamic>> activeSchedules = [];
+
+
 
   @override
   void initState() {
@@ -38,6 +42,17 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
      examDate = widget.formDetails![0]['exam_date'];
      dateExam = DateTime.parse(examDate!);
      formattedExamDate = formatDate(dateExam!);
+
+     for (var schedule in widget.formDetails![0]['db_exam_admission_schedule']) {
+      if (schedule['schedule_status'] == 'cancelled') {
+        cancelledSchedules.add(schedule);
+      } else {
+        activeSchedules.add(schedule);
+        
+      }
+    }
+
+
   }
 
 
@@ -86,8 +101,9 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 60),
+          const SizedBox(height: 15),
 
           Container(
               padding: const EdgeInsets.all(16),
@@ -131,7 +147,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       const SizedBox(width: 16),
                       Expanded(
                         flex: 2,
-                        child: _buildInfoColumn(
+                        child: _buildInfoColumn2(
                           label: 'Grade Level',
                           value: widget.formDetails![0]['grade_level'],
                           scale: scale,
@@ -192,7 +208,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
 
 
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 15),
 
           // Three Copies of Rows in Containers
           /*for (int i = 0; i < 2; i++) 
@@ -270,15 +286,41 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
               ),
             ),*/
 
-
+            Text(
+              'APPLICANT (${activeSchedules.length}) ',
+              style: const TextStyle(
+                fontSize: 14, // Adjust the font size as needed
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             SizedBox(
-              height: 500,
+              height: 300,
               width: 1500,
               child: ListView.builder(
-                itemCount: widget.formDetails![0]['db_exam_admission_schedule'].length,
+                itemCount: activeSchedules.length,
                 itemBuilder: (context, i) {
                   // You can access your data here like this:
-                  var admissionSchedule = widget.formDetails![0]['db_exam_admission_schedule'][i];
+                  activeSchedules.sort((a, b) {
+                    // If schedule_status is null, prioritize it to the top
+                    if (a['schedule_status'] == null && b['schedule_status'] != null) {
+                      return -1; // a comes before b
+                    }
+                    if (a['schedule_status'] != null && b['schedule_status'] == null) {
+                      return 1; // b comes before a
+                    }
+
+                    // If schedule_status is "cancelled", prioritize it to the bottom
+                    if (a['schedule_status'] == 'cancelled' && b['schedule_status'] != 'cancelled') {
+                      return 1; // a comes after b
+                    }
+                    if (a['schedule_status'] != 'cancelled' && b['schedule_status'] == 'cancelled') {
+                      return -1; // b comes after a
+                    }
+
+                    // If both are the same (either both null or both "cancelled"), keep original order
+                    return 0;
+                  });
+                  var admissionSchedule = activeSchedules[i];
                   String admissionCreated = admissionSchedule['db_admission_table']['created_at'];
                   DateTime admissionDate = DateTime.parse(admissionCreated);
                   String formattedAdmissionDate = formatDate(admissionDate);
@@ -305,7 +347,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  flex: 10,
+                  flex: 8,
                   child: _buildInfoColumn(
                     label: 'Applicant Name',
                     value: '${admissionSchedule['db_admission_table']['first_name']} ${admissionSchedule['db_admission_table']['last_name']}', // Example, adjust according to your data
@@ -314,7 +356,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  flex: 4,
+                  flex: 5,
                   child: _buildInfoColumn(
                     label: 'Grade Level',
                     value: admissionSchedule['db_admission_table']['level_applying_for'] ?? 'N/A', // Example, adjust according to your data
@@ -322,14 +364,14 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Expanded(
+                admissionSchedule['schedule_status']!='cancelled'?Expanded(
                   flex: 6,
                   child: _buildInfoColumn(
                     label: 'Application Status',
                     value: admissionSchedule['db_admission_table']['admission_status'].toUpperCase() ?? 'N/A', // Example, adjust according to your data
                     scale: scale,
                   ),
-                ),
+                ):const SizedBox(),
                 const SizedBox(width: 16),
                                         Expanded(
                           flex: 6,
@@ -341,7 +383,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                         ),
                 const SizedBox(width: 16),
                  if(isExamToday(formattedExamDate!))
-                 Row(
+                 admissionSchedule['schedule_status']!='cancelled'?Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Green Check Button
@@ -455,7 +497,16 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                               ),
                             ),
                         ],
-                      ), // This could still be removed if unnecessary
+                      ):
+                      
+                      Expanded(
+                        flex: 9,
+                        child: _buildInfoColumn(
+                          label: 'Cancel Reason',
+                          value: admissionSchedule['schedule_cancel_reason'] ??'', // Example, adjust according to your data
+                          scale: scale,
+                        ),
+                      ) // This could still be removed if unnecessary
               ],
                         ),
                         const SizedBox(height: 16),
@@ -469,21 +520,16 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
               ),
             ),
 
+              const SizedBox(height: 15),
              Row(
   mainAxisAlignment: MainAxisAlignment.start, // Aligns the content to the left
   crossAxisAlignment: CrossAxisAlignment.center, // Aligns text and icon vertically
   children: [
-    const Text(
-      'Reschedule ',
-      style: TextStyle(
+     Text(
+      'RESCHEDULE (${cancelledSchedules.length})',
+      style:const TextStyle(
         fontSize: 14, // Adjust the font size as needed
         fontWeight: FontWeight.bold,
-      ),
-    ),
-    Text(
-      widget.formDetails![0]['db_exam_admission_schedule'].length.toString(), // Display the number of applications
-      style: const TextStyle(
-        fontSize: 14,
       ),
     ),
     const SizedBox(width: 4), // Space between text and icon
@@ -492,7 +538,234 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
       size: 20, // Adjust size as needed
     ),
   ],
-)
+),
+
+            SizedBox(
+              height: 300,
+              width: 1500,
+              child: ListView.builder(
+                itemCount: cancelledSchedules.length,
+                itemBuilder: (context, i) {
+                  // You can access your data here like this:
+                  activeSchedules.sort((a, b) {
+                    // If schedule_status is null, prioritize it to the top
+                    if (a['schedule_status'] == null && b['schedule_status'] != null) {
+                      return -1; // a comes before b
+                    }
+                    if (a['schedule_status'] != null && b['schedule_status'] == null) {
+                      return 1; // b comes before a
+                    }
+
+                    // If schedule_status is "cancelled", prioritize it to the bottom
+                    if (a['schedule_status'] == 'cancelled' && b['schedule_status'] != 'cancelled') {
+                      return 1; // a comes after b
+                    }
+                    if (a['schedule_status'] != 'cancelled' && b['schedule_status'] == 'cancelled') {
+                      return -1; // b comes after a
+                    }
+
+                    // If both are the same (either both null or both "cancelled"), keep original order
+                    return 0;
+                  });
+                  var admissionSchedule = cancelledSchedules[i];
+                  String admissionCreated = admissionSchedule['db_admission_table']['created_at'];
+                  DateTime admissionDate = DateTime.parse(admissionCreated);
+                  String formattedAdmissionDate = formatDate(admissionDate);
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      children: [
+                        // Second Row
+                        Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: _buildInfoColumn(
+                    label: 'Application ID',
+                    value: admissionSchedule['admission_id'].toString() ?? 'N/A', // Example, adjust according to your data
+                    scale: scale,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 8,
+                  child: _buildInfoColumn(
+                    label: 'Applicant Name',
+                    value: '${admissionSchedule['db_admission_table']['first_name']} ${admissionSchedule['db_admission_table']['last_name']}', // Example, adjust according to your data
+                    scale: scale,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 5,
+                  child: _buildInfoColumn(
+                    label: 'Grade Level',
+                    value: admissionSchedule['db_admission_table']['level_applying_for'] ?? 'N/A', // Example, adjust according to your data
+                    scale: scale,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                admissionSchedule['schedule_status']!='cancelled'?Expanded(
+                  flex: 6,
+                  child: _buildInfoColumn(
+                    label: 'Application Status',
+                    value: admissionSchedule['db_admission_table']['admission_status'].toUpperCase() ?? 'N/A', // Example, adjust according to your data
+                    scale: scale,
+                  ),
+                ):const SizedBox(),
+                const SizedBox(width: 16),
+                                        Expanded(
+                          flex: 6,
+                          child: _buildInfoColumn(
+                            label: 'Date Created',
+                            value: formattedAdmissionDate ?? 'N/A', // Example, adjust according to your data
+                            scale: scale,
+                          ),
+                        ),
+                const SizedBox(width: 16),
+                 if(isExamToday(formattedExamDate!))
+                 admissionSchedule['schedule_status']!='cancelled'?Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Green Check Button
+                          if (!isRedExpanded[i])
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: isGreenExpanded[i] ? 99 : 44,
+                              height: 44,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  try {
+                                            final response = await http.post(
+                                              Uri.parse('$apiUrl/api/admin/update_admission'),
+                                              headers: {
+                                                'Content-Type': 'application/json',
+                                                'supabase-url': supabaseUrl,
+                                                'supabase-key': supabaseKey,
+                                              },
+                                              body: json.encode({
+                                                'admission_id': admissionSchedule['db_admission_table']['admission_id'],  
+                                                'user_id':widget.userId,
+                                                'is_assessment':true,
+                                                'is_attended':true
+                                              }),
+                                            );
+
+                                            if (response.statusCode == 200) {
+                                              final responseBody = jsonDecode(response.body);
+                                            } else {
+                                              // Handle failure
+                                              final responseBody = jsonDecode(response.body);
+                                              print('Error: ${responseBody['error']}');
+                                            }
+                                          } catch (error) {
+                                            // Handle error (e.g., network error)
+                                            print('Error: $error');
+                                          }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+
+                          // Space between buttons
+                          if (!isGreenExpanded[i])
+                            const SizedBox(width: 2),
+
+                          // Red X Button
+                          if (!isGreenExpanded[i])
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: isRedExpanded[i] ? 99 : 44,
+                              height: 44,
+                              child: ElevatedButton(
+                                onPressed: ()async {
+                                  try {
+                                            final response = await http.post(
+                                              Uri.parse('$apiUrl/api/admin/update_admission'),
+                                              headers: {
+                                                'Content-Type': 'application/json',
+                                                'supabase-url': supabaseUrl,
+                                                'supabase-key': supabaseKey,
+                                              },
+                                              body: json.encode({
+                                                'admission_id': admissionSchedule['db_admission_table']['admission_id'],  
+                                                'user_id':widget.userId,
+                                                'is_assessment':false,
+                                                'is_attended':false,
+                                                'admission_status':'pending'
+                                              }),
+                                            );
+
+                                            if (response.statusCode == 200) {
+                                              final responseBody = jsonDecode(response.body);
+                                            } else {
+                                              // Handle failure
+                                              final responseBody = jsonDecode(response.body);
+                                              print('Error: ${responseBody['error']}');
+                                            }
+                                          } catch (error) {
+                                            // Handle error (e.g., network error)
+                                            print('Error: $error');
+                                          }
+
+                                  setState(() {
+                                    isRedExpanded[i] = true;
+                                    isGreenExpanded[i] = false;
+                                    isInvoiceDisabled[i] = true; // Disable invoice button
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ):
+                      
+                      Expanded(
+                        flex: 9,
+                        child: _buildInfoColumn(
+                          label: 'Cancel Reason',
+                          value: admissionSchedule['schedule_cancel_reason'] ??'', // Example, adjust according to your data
+                          scale: scale,
+                        ),
+                      ) // This could still be removed if unnecessary
+              ],
+                        ),
+                        const SizedBox(height: 16),
+              
+                        // Third Row (Date Created)
+
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
 
 
         ],
@@ -526,6 +799,8 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                 fontSize: 12 * scale,
                 fontFamily: 'Roboto-B',
               ),
+                overflow: TextOverflow.ellipsis,
+                maxLines:1
             ),
           ],
         ),
@@ -537,4 +812,71 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
       ],
     );
   }
+
+
+
+  Widget _buildInfoColumn2({
+  required String label,
+  required String value,
+  required double scale,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11 * scale,
+              fontFamily: 'Roboto-R',
+            ),
+          ),
+          const SizedBox(width: 30),
+          // Wrap the Text widget in a MouseRegion to detect hover and show a popup (tooltip)
+          MouseRegion(
+            onEnter: (_) {
+              // You can define actions on hover if needed
+            },
+            onExit: (_) {
+              // You can define actions on hover exit if needed
+            },
+            child: Tooltip(
+              message: value, // The full value will be shown when hovering
+              padding: const EdgeInsets.all(8.0), // Adjust padding around the tooltip
+              decoration: BoxDecoration(
+                color: const Color(0xff012169),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 11 * scale,
+                fontFamily: 'Roboto-B',
+              ),
+              child: Container(
+                width: 85,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12 * scale,
+                    fontFamily: 'Roboto-B',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Container(
+        height: 1,
+        color: const Color(0xFF909590),
+      ),
+    ],
+  );
+}
+
 }
