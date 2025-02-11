@@ -3,7 +3,6 @@
 
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cdbs_admin/class/admission_forms.dart';
 import 'package:cdbs_admin/shared/api.dart';
 import 'package:flutter/material.dart';
@@ -414,7 +413,7 @@ const SizedBox(width: 40,),
 
 
   // Show image dialog when image is clicked
-  void _showImageDialog(String? imagePath, int id, int admissionId, String docStatus, List<Map<String, dynamic>> formRequirements, String gradeLevel) {
+ /* void _showImageDialog(String? imagePath, int id, int admissionId, String docStatus, List<Map<String, dynamic>> formRequirements, String gradeLevel) {
 
     bool isComplete=false;
     bool isResult=false;
@@ -698,7 +697,7 @@ const SizedBox(width: 40,),
     },
   );
 }
-
+*/
 
 }
 

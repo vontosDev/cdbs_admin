@@ -1,5 +1,7 @@
+import 'package:cdbs_admin/class/admission_forms.dart';
 import 'package:cdbs_admin/shared/api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -24,36 +26,82 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
   String? examDate;
   DateTime? dateExam;
   String? formattedExamDate;
-
+  bool isLoad=false;
+  List<bool> isLoading = [];
 
   List<Map<String, dynamic>> cancelledSchedules = [];
   List<Map<String, dynamic>> activeSchedules = [];
-
+  List<Map<String, dynamic>> myformDetails=[];
 
 
   @override
   void initState() {
     super.initState();
     // Initialize the service with your endpoint
-     dateCreatedString = widget.formDetails![0]['create_at'];
+      myformDetails = widget.formDetails!;
+     dateCreatedString = myformDetails[0]['create_at'];
      dateCreated = DateTime.parse(dateCreatedString!);
      formattedDate = formatDate(dateCreated!);
 
-     examDate = widget.formDetails![0]['exam_date'];
+     examDate = myformDetails[0]['exam_date'];
      dateExam = DateTime.parse(examDate!);
      formattedExamDate = formatDate(dateExam!);
 
-     for (var schedule in widget.formDetails![0]['db_exam_admission_schedule']) {
+     for (var schedule in myformDetails[0]['db_exam_admission_schedule']) {
       if (schedule['schedule_status'] == 'cancelled') {
         cancelledSchedules.add(schedule);
       } else {
         activeSchedules.add(schedule);
-        
+        isLoading = List.generate(activeSchedules.length, (index) => false);
       }
     }
 
 
   }
+
+  /*Future<void> updateData(int admissionId) async  {
+    myformDetails = await ApiService(apiUrl).fetchScheduleById(admissionId, supabaseUrl, supabaseKey);
+    
+  }*/
+
+  Future<void> updateData(int admissionId, int scheduleId) async {
+  // Fetch the form details
+  myformDetails = await ApiService(apiUrl).fetchScheduleById(scheduleId, supabaseUrl, supabaseKey);
+
+  // Extract the schedule you need to update
+  var schedule = myformDetails[0]['db_exam_admission_schedule']
+      .firstWhere((s) => s['schedule_status'] == null && s['admission_id'] == admissionId, orElse: () => null);
+
+    if (schedule != null) {
+  // Find the index in activeSchedules that corresponds to the selected schedule
+  int scheduleIndex = activeSchedules.indexWhere((activeSchedule) =>
+      activeSchedule['admission_id'] == admissionId &&
+      activeSchedule['schedule_status'] == null);
+
+  if (schedule != null) {
+  // Find the index in activeSchedules that corresponds to the selected schedule
+  int scheduleIndex = activeSchedules.indexWhere((activeSchedule) =>
+      activeSchedule['admission_id'] == admissionId &&
+      activeSchedule['schedule_status'] == null);
+
+  if (scheduleIndex != -1) {
+    // Now update the selected index in activeSchedules with the new schedule object directly
+    setState(() {
+      activeSchedules[scheduleIndex] = schedule;  // Replace the entire object at the found index
+    });
+  } else {
+    print("No matching schedule found in activeSchedules.");
+  }
+} else {
+  print("No valid schedule found to update.");
+}
+
+} else {
+  print("No valid schedule found to update.");
+}
+
+
+}
 
 
   String formatDate(DateTime date) {
@@ -64,11 +112,18 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
   }
 
   bool isExamToday(String dateExam) {
-    // Get today's date and format it
-    final String today = formatDate(DateTime.now());
-    // Compare if today is the same as the exam date
-    return today == dateExam;
-  }
+  // Get today's date and format it
+  final String todayString = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+  // Parse the dateExam string into a DateTime object
+  final DateTime examDate = DateFormat('yyyy-MM-dd').parse(dateExam);
+
+  // Parse today's date into a DateTime object
+  final DateTime today = DateFormat('yyyy-MM-dd').parse(todayString);
+
+  // Return true if today is greater than or equal to the exam date
+  return today.isAtSameMomentAs(examDate) || today.isAfter(examDate);
+}
 
 
   String formatTime(String time) {
@@ -93,10 +148,26 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
     double widthScale = screenWidth / baseWidth;
     double heightScale = screenHeight / baseHeight;
     double scale = widthScale < heightScale ? widthScale : heightScale;
+    
+      List<bool> isGreenExpanded = List.generate(activeSchedules.length, (index) {
+        // Check is_attended value and set the corresponding expanded state
+        bool isAttended = activeSchedules[index]['is_attended'] ?? false; // Default to false if null
+        return isAttended == true; // Green expands if is_attended is true
+      });
 
-      final List<bool> isGreenExpanded = List.generate(widget.formDetails![0]['db_exam_admission_schedule'].length, (_) => false);
-      final List<bool> isRedExpanded = List.generate(widget.formDetails![0]['db_exam_admission_schedule'].length, (_) => false);
-    final List<bool> isInvoiceDisabled = List.generate(widget.formDetails![0]['db_exam_admission_schedule'].length, (_) => false);
+      List<bool> isRedExpanded = List.generate(activeSchedules.length, (index) {
+        // Check is_attended value and set the corresponding expanded state
+        bool isAttended = activeSchedules[index]['is_attended'] ?? false; // Default to false if null
+        //print(false);
+        if(activeSchedules[index]['is_attended']==null){
+          return isAttended; // Red expands if is_attended is false
+        }else{
+          return isAttended ==false;
+        }
+        
+      });
+      final List<bool> isInvoiceDisabled = List.generate(myformDetails[0]['db_exam_admission_schedule'].length, (_) => false);
+      
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -131,7 +202,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                         flex: 2,
                         child: _buildInfoColumn(
                           label: 'Exam Time',
-                          value: '${formatTime(widget.formDetails![0]['start_time'])} - ${formatTime(widget.formDetails![0]['end_time'])}',
+                          value: '${formatTime(myformDetails[0]['start_time'])} - ${formatTime(myformDetails[0]['end_time'])}',
                           scale: scale,
                         ),
                       ),
@@ -140,7 +211,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                         flex: 2,
                         child: _buildInfoColumn(
                           label: 'Meeting Place',
-                          value: widget.formDetails![0]['location'],
+                          value: myformDetails[0]['location'],
                           scale: scale,
                         ),
                       ),
@@ -149,7 +220,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                         flex: 2,
                         child: _buildInfoColumn2(
                           label: 'Grade Level',
-                          value: widget.formDetails![0]['grade_level'],
+                          value: myformDetails[0]['grade_level'],
                           scale: scale,
                         ),
                       ),
@@ -324,6 +395,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                   String admissionCreated = admissionSchedule['db_admission_table']['created_at'];
                   DateTime admissionDate = DateTime.parse(admissionCreated);
                   String formattedAdmissionDate = formatDate(admissionDate);
+                  
                   return Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -383,7 +455,8 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                         ),
                 const SizedBox(width: 16),
                  if(isExamToday(formattedExamDate!))
-                 admissionSchedule['schedule_status']!='cancelled'?Row(
+                 !isLoading[i]?
+                 Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Green Check Button
@@ -393,35 +466,51 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                               width: isGreenExpanded[i] ? 99 : 44,
                               height: 44,
                               child: ElevatedButton(
-                                onPressed: () async {
-                                  try {
-                                            final response = await http.post(
-                                              Uri.parse('$apiUrl/api/admin/update_admission'),
-                                              headers: {
-                                                'Content-Type': 'application/json',
-                                                'supabase-url': supabaseUrl,
-                                                'supabase-key': supabaseKey,
-                                              },
-                                              body: json.encode({
-                                                'admission_id': admissionSchedule['db_admission_table']['admission_id'],  
-                                                'user_id':widget.userId,
-                                                'is_assessment':true,
-                                                'is_attended':true
-                                              }),
-                                            );
+                                onPressed: activeSchedules[i]['is_attended'] == null
+                                    ? () async {
+                                        setState(() {
+                                          isLoading[i] = true; // Set loading state to true when the button is pressed
+                                        });
+                                        try {
+                                          final response = await http.post(
+                                            Uri.parse('$apiUrl/api/admin/update_admission'),
+                                            headers: {
+                                              'Content-Type': 'application/json',
+                                              'supabase-url': supabaseUrl,
+                                              'supabase-key': supabaseKey,
+                                            },
+                                            body: json.encode({
+                                              'admission_id': admissionSchedule['db_admission_table']['admission_id'],
+                                              'user_id': widget.userId,
+                                              'is_assessment': true,
+                                              'is_attended': true
+                                            }),
+                                          );
 
-                                            if (response.statusCode == 200) {
-                                              final responseBody = jsonDecode(response.body);
-                                            } else {
-                                              // Handle failure
-                                              final responseBody = jsonDecode(response.body);
-                                              print('Error: ${responseBody['error']}');
-                                            }
-                                          } catch (error) {
-                                            // Handle error (e.g., network error)
-                                            print('Error: $error');
+                                          if (response.statusCode == 200) {
+                                            final responseBody = jsonDecode(response.body);
+                                            setState(() {
+                                              updateData(admissionSchedule['db_admission_table']['admission_id'],widget.formDetails![0]['schedule_id']); 
+                                            });
+                                            
+                                          } else {
+                                            // Handle failure
+                                            final responseBody = jsonDecode(response.body);
+                                            print('Error: ${responseBody['error']}');
                                           }
-                                },
+                                        } catch (error) {
+                                          // Handle error (e.g., network error)
+                                          print('Error: $error');
+                                        }
+
+                                        setState(() {
+                                          isRedExpanded[i] = false;
+                                          isGreenExpanded[i] = true;
+                                          isInvoiceDisabled[i] = true; // Disable invoice button
+                                          isLoading[i] = false;  // Set loading state to false after the request is completed
+                                        });
+                                      }
+                                    : () {},
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   shape: RoundedRectangleBorder(
@@ -429,10 +518,10 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                                   ),
                                   padding: EdgeInsets.zero,
                                 ),
-                                child: const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                ),
+                                child:  const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                      ),
                               ),
                             ),
 
@@ -447,7 +536,10 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                               width: isRedExpanded[i] ? 99 : 44,
                               height: 44,
                               child: ElevatedButton(
-                                onPressed: ()async {
+                                onPressed:activeSchedules[i]['is_attended']==null? ()async {
+                                  setState(() {
+                                    isLoading[i]=true;
+                                  });
                                   try {
                                             final response = await http.post(
                                               Uri.parse('$apiUrl/api/admin/update_admission'),
@@ -467,6 +559,9 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
 
                                             if (response.statusCode == 200) {
                                               final responseBody = jsonDecode(response.body);
+                                              setState(() {
+                                                updateData(admissionSchedule['db_admission_table']['admission_id'],widget.formDetails![0]['schedule_id']); 
+                                              });
                                             } else {
                                               // Handle failure
                                               final responseBody = jsonDecode(response.body);
@@ -481,8 +576,9 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                                     isRedExpanded[i] = true;
                                     isGreenExpanded[i] = false;
                                     isInvoiceDisabled[i] = true; // Disable invoice button
+                                    isLoading[i] = false;
                                   });
-                                },
+                                }:(){},
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red,
                                   shape: RoundedRectangleBorder(
@@ -491,22 +587,17 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                                   padding: EdgeInsets.zero,
                                 ),
                                 child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                ),
+                                        Icons.close,
+                                        color: Colors.white,
+                                      ),
                               ),
                             ),
                         ],
-                      ):
-                      
-                      Expanded(
-                        flex: 9,
-                        child: _buildInfoColumn(
-                          label: 'Cancel Reason',
-                          value: admissionSchedule['schedule_cancel_reason'] ??'', // Example, adjust according to your data
-                          scale: scale,
-                        ),
-                      ) // This could still be removed if unnecessary
+                      ):const SpinKitCircle(
+                        color: Color(0xff012169), // Change the color as needed
+                        size: 50.0, // Adjust size as needed
+                      )
+                       // This could still be removed if unnecessary
               ],
                         ),
                         const SizedBox(height: 16),
@@ -522,23 +613,23 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
 
               const SizedBox(height: 15),
              Row(
-  mainAxisAlignment: MainAxisAlignment.start, // Aligns the content to the left
-  crossAxisAlignment: CrossAxisAlignment.center, // Aligns text and icon vertically
-  children: [
-     Text(
-      'RESCHEDULE (${cancelledSchedules.length})',
-      style:const TextStyle(
-        fontSize: 14, // Adjust the font size as needed
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-    const SizedBox(width: 4), // Space between text and icon
-    const Icon(
-      Icons.keyboard_arrow_down, // Down arrow icon
-      size: 20, // Adjust size as needed
-    ),
-  ],
-),
+                mainAxisAlignment: MainAxisAlignment.start, // Aligns the content to the left
+                crossAxisAlignment: CrossAxisAlignment.center, // Aligns text and icon vertically
+                children: [
+                  Text(
+                    'RESCHEDULE (${cancelledSchedules.length})',
+                    style:const TextStyle(
+                      fontSize: 14, // Adjust the font size as needed
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 4), // Space between text and icon
+                  const Icon(
+                    Icons.keyboard_arrow_down, // Down arrow icon
+                    size: 20, // Adjust size as needed
+                  ),
+                ],
+              ),
 
             SizedBox(
               height: 300,

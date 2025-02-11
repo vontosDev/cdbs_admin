@@ -442,6 +442,13 @@ TextField(
   ),
 ),
 
+
+
+
+
+
+
+
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -477,13 +484,17 @@ TextField(
                 height: 35,
                 child: ElevatedButton(
                   onPressed: () async {
-                    //String timeStart=convertTimeTo24HourFormat(startTimeController.text);
-                    //String timeEnd=convertTimeTo24HourFormat(endTimeController.text);
-                    bool isValid =validateAndConvertTime(startTimeController.text, endTimeController.text);
-                    //print(isValid);
-                    if(isValid){
-                      showMessageDialog(context, 'Invalid time range: Start and end times must be between 08:00 AM and 05:00 PM, with the start time before the end time.', isValid);
-                    }else{
+                    bool isValid =false;
+                    if(startTimeController.text.isEmpty || endTimeController.text.isEmpty || dateController.text.isEmpty || selectedGrades.isEmpty || slotController.text.isEmpty){
+                      showMessageDialog(context, 'All fields are required', true);
+                    }
+                    else{
+                      if(startTimeController.text.isNotEmpty && endTimeController.text.isNotEmpty){
+                        isValid =validateAndConvertTime(startTimeController.text, endTimeController.text);
+                        if(isValid){
+                        showMessageDialog(context, 'Invalid time range: Start and end times must be between 08:00 AM and 05:00 PM, with the start time before the end time.', isValid);
+                        }
+                      }
                       try {
                       final response = await http.post(Uri.parse('$apiUrl/api/admin/create_exam_schedule'),
                                               headers: {
@@ -505,10 +516,20 @@ TextField(
                                               final responseBody = jsonDecode(response.body);
                                               Navigator.of(context).popUntil((route) => route.isFirst);
                                               showMessageDialog(context, 'The exam schedule has been successfully created.', isValid);
+                                              setState(() {
+                                                dateController.text='';
+                                                startTimeController.text='';
+                                                endTimeController.text='';
+                                                locationController.text='';
+                                                gradeController.text='';
+                                                slotController.text='';
+                                                selectedGrades.clear();
+                                              });
                                             } else {
                                               // Handle failure
                                               final responseBody = jsonDecode(response.body);
                                               print('Error: ${responseBody['error']}');
+                                              showMessageDialog(context, '${responseBody['error']}', true);
                                             }
                                           } catch (error) {
                                             // Handle error (e.g., network error)
@@ -542,6 +563,7 @@ TextField(
                       locationController.text='';
                       gradeController.text='';
                       slotController.text='';
+                      selectedGrades.clear();
                     });
                     Navigator.of(context).pop(); // Close the modal
                   },
@@ -618,7 +640,7 @@ TextField(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: Text(
                     'EXAM DATE',
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
@@ -639,21 +661,21 @@ TextField(
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
                     'GRADE LEVEL',
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Text(
                     'SLOTS',
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Text(
                     'Date Created',
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
@@ -685,7 +707,7 @@ TextField(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            flex: 1,
+                            flex: 2,
                             child: Row(
                               children: [
                                 Text(formattedExamDate,
@@ -707,19 +729,20 @@ TextField(
                             ),
                           ),
                           Expanded(
-                            flex: 2,
+                            flex: 3,
                             child: Text(request['grade_level'].toUpperCase(),
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
                           ),
+                          const SizedBox(width: 40,),
                           Expanded(
-                            flex: 2,
+                            flex: 1,
                             child: Text(request['reservation_count']==request['slots']?'FULL':'${request['reservation_count']}/${request['slots']}',
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
                           ),
                           Expanded(
-                            flex: 2,
+                            flex: 1,
                             child: Text(formattedDate,
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
@@ -1130,25 +1153,31 @@ Widget _buildViewContent(double scale, List<Map<String, dynamic>> details, int u
 
 bool validateAndConvertTime(String startTime12Hour, String endTime12Hour) {
   try {
-    // Parse times in 12-hour format
-    DateTime startTime = DateFormat("hh:mm a").parse(startTime12Hour);
-    DateTime endTime = DateFormat("hh:mm a").parse(endTime12Hour);
 
     
+    // Parse times in 12-hour format
+    DateTime startTime = DateFormat("hh:mm a").parse(startTime12Hour);
+    DateTime endTime = DateFormat("hh:mm a").parse(endTime12Hour);    
     // Rebuild times on the same arbitrary date (e.g., 2024-01-01) to normalize comparisons
     DateTime workingStartTime = DateTime(2024, 12, 13, startTime.hour, startTime.minute);
     DateTime workingEndTime = DateTime(2024, 12, 13, endTime.hour, endTime.minute);
 
     // Validate the time range
+
+
+
     if (!isValidWorkingHourRange(workingStartTime, workingEndTime)) {
       
       return true; // Invalid time range
       
     }
 
+
     // Convert to 24-hour format for additional processing or debugging if needed
     String start24 = DateFormat("HH:mm").format(workingStartTime);
     String end24 = DateFormat("HH:mm").format(workingEndTime);
+
+    
 
     print("Converted Start Time: $start24, End Time: $end24");
 

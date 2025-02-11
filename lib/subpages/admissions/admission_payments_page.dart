@@ -99,6 +99,57 @@ String formatDate(DateTime date) {
   return formatter.format(localDate);
 }
 
+List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests, String adminType) {
+
+    if (adminType == 'Center for Learner Wellness') {
+    requests = requests.where((request) {
+      return request['db_admission_table']['is_paid'] == true;
+    }).toList();
+  }
+
+
+  requests.sort((a, b) {
+    // Extract the admission statuses
+    String admissionStatusA = a['db_admission_table']['admission_status'] ?? '';
+    String admissionStatusB = b['db_admission_table']['admission_status'] ?? '';
+
+    // Extract the is_complete_view flag
+    bool isCompleteA = a['db_admission_table']['is_paid'];
+    bool isCompleteB = b['db_admission_table']['is_paid'];
+
+    // 1. First, check for 'pending' - it should come first.
+    if (admissionStatusA == 'pending' && admissionStatusB != 'pending' && !isCompleteA) {
+      return -1; // 'a' (pending) should come before 'b'
+    } else if (admissionStatusB == 'pending' && admissionStatusA != 'pending' && !isCompleteB) {
+      return 1; // 'b' (pending) should come before 'a'
+    }
+
+    // 2. Next, check for 'in review' - it should come after 'pending', but before other statuses.
+    if (admissionStatusA == 'in review' && admissionStatusB != 'pending' && admissionStatusB != 'in review') {
+      return -1; // 'a' (in review) should come before 'b'
+    } else if (admissionStatusB == 'in review' && admissionStatusA != 'pending' && admissionStatusA != 'in review') {
+      return 1; // 'b' (in review) should come before 'a'
+    }
+
+    // 3. If one of the statuses is 'pending' or 'in review' and its is_complete_view is true, push it to the end.
+    // However, we only do this after sorting 'pending' and 'in review'.
+    if ((admissionStatusA == 'pending' || admissionStatusA == 'in review') && isCompleteA) {
+      return 1; // 'a' (pending/in review with complete) should go after 'b'
+    } else if ((admissionStatusB == 'pending' || admissionStatusB == 'in review') && isCompleteB) {
+      return -1; // 'b' (pending/in review with complete) should go after 'a'
+    }
+
+    // 4. Now, use _getSortOrder to compare other statuses based on is_complete_view
+    // This will be applied to statuses that are neither 'pending' nor 'in review'.
+    int sortOrderA = _getSortOrder(isCompleteA);
+    int sortOrderB = _getSortOrder(isCompleteB);
+
+    // 5. If both are neither 'pending' nor 'in review', compare them using _getSortOrder.
+    return sortOrderA.compareTo(sortOrderB);
+  });
+
+  return requests;
+}
 
 
   Color _getStatusColor(String status) {
@@ -161,7 +212,7 @@ String formatDate(DateTime date) {
                   );
                 }
                 requests = snapshot.data ?? []; // Use the data from the snapshot
-                filteredRequest = sortRequests(requests);
+                filteredRequest = sortRequests(requests, authState.adminType);
                 filteredRequest = statusFilter.isEmpty
                                             ? requests
                                             : requests
@@ -206,7 +257,7 @@ String formatDate(DateTime date) {
       ),
 
       if (_selectedAction == 0) _buildDefaultContent(scale), // Default content
-      if (_selectedAction == 1) _buildViewContent(scale, formDetails!, authState.uid), // View content
+      if (_selectedAction == 1) _buildViewContent(scale, formDetails!, authState.uid, authState.adminType), // View content
       if (_selectedAction == 2) _buildReminderContent(scale), // Reminder content
       if (_selectedAction == 3) _buildDeactivateContent(scale),
       if (_selectedAction == 4) _buildDeactivateContent(scale),
@@ -493,15 +544,15 @@ const SizedBox(height: 40),
                             flex: 2,
                             child: Row(
                               children: [
-                                Checkbox(
-                                  value: checkboxStates[index],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      checkboxStates[index] = value ?? false;
-                                    });
-                                  },
-                                  activeColor: const Color(0XFF012169), // Set the active color to pink
-                                ),
+                                // Checkbox(
+                                //   value: checkboxStates[index],
+                                //   onChanged: (value) {
+                                //     setState(() {
+                                //       checkboxStates[index] = value ?? false;
+                                //     });
+                                //   },
+                                //   activeColor: const Color(0XFF012169), // Set the active color to pink
+                                // ),
                                 SelectableText(
                                   request['db_admission_table']['admission_form_id'].toString(),
                                   style: TextStyle(fontSize: 16 * scale),
@@ -509,13 +560,30 @@ const SizedBox(height: 40),
                               ],
                             ),
                           ),
-                    Expanded(
-                      flex: 3,
-                      child: SelectableText(
-                        fullName,
-                        style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
-                      ),
-                    ),
+                   Expanded(
+  flex: 3,
+  child: Tooltip(
+    message: fullName, // Full name shown on hover
+    padding: const EdgeInsets.all(8.0),
+    decoration: BoxDecoration(
+      color: const Color(0xff012169),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    textStyle: const TextStyle(
+      color: Colors.white,
+      fontSize: 14,
+    ),
+    child: Text(
+      fullName,
+      style: TextStyle(
+        fontFamily: 'Roboto-R',
+        fontSize: 16 * scale,
+      ),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+    ),
+  ),
+),
                     Expanded(
                       flex: 2,
                       child: SelectableText(
@@ -648,7 +716,7 @@ const SizedBox(height: 40),
     );
   }
  // Build content for each action (VIEW, REMINDER, DEACTIVATE)
-  Widget _buildViewContent(double scale, List<Map<String, dynamic>> details, int userId) {
+  Widget _buildViewContent(double scale, List<Map<String, dynamic>> details, int userId, String adminType) {
     return Container(
   padding: const EdgeInsets.all(16),
   child: Column(
@@ -675,7 +743,7 @@ const SizedBox(height: 40),
       // Adding AdmissionApplicationsPage2 below the buttons
        AdmissionPaymentsPage2(formDetails: details, onNextPressed: (bool isClicked) {
          context.read<AdmissionBloc>().add(MarkAsCompleteClicked(isClicked));
-       },userId: userId),
+       },userId: userId, adminType:adminType),
     ],
   ),
 );
@@ -742,49 +810,7 @@ const SizedBox(height: 40),
     );
   }
 
-  List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests) {
-  requests.sort((a, b) {
-    // Extract the admission statuses
-    String admissionStatusA = a['db_admission_table']['admission_status'] ?? '';
-    String admissionStatusB = b['db_admission_table']['admission_status'] ?? '';
-
-    // Extract the is_complete_view flag
-    bool isCompleteA = a['db_admission_table']['is_paid'] ?? false;
-    bool isCompleteB = b['db_admission_table']['is_paid'] ?? false;
-
-    // 1. First, check for 'pending' - it should come first.
-    if (admissionStatusA == 'pending' && admissionStatusB != 'pending' && !isCompleteA) {
-      return -1; // 'a' (pending) should come before 'b'
-    } else if (admissionStatusB == 'pending' && admissionStatusA != 'pending' && !isCompleteB) {
-      return 1; // 'b' (pending) should come before 'a'
-    }
-
-    // 2. Next, check for 'in review' - it should come after 'pending', but before other statuses.
-    if (admissionStatusA == 'in review' && admissionStatusB != 'pending' && admissionStatusB != 'in review') {
-      return -1; // 'a' (in review) should come before 'b'
-    } else if (admissionStatusB == 'in review' && admissionStatusA != 'pending' && admissionStatusA != 'in review') {
-      return 1; // 'b' (in review) should come before 'a'
-    }
-
-    // 3. If one of the statuses is 'pending' or 'in review' and its is_complete_view is true, push it to the end.
-    // However, we only do this after sorting 'pending' and 'in review'.
-    if ((admissionStatusA == 'pending' || admissionStatusA == 'in review') && isCompleteA) {
-      return 1; // 'a' (pending/in review with complete) should go after 'b'
-    } else if ((admissionStatusB == 'pending' || admissionStatusB == 'in review') && isCompleteB) {
-      return -1; // 'b' (pending/in review with complete) should go after 'a'
-    }
-
-    // 4. Now, use _getSortOrder to compare other statuses based on is_complete_view
-    // This will be applied to statuses that are neither 'pending' nor 'in review'.
-    int sortOrderA = _getSortOrder(isCompleteA);
-    int sortOrderB = _getSortOrder(isCompleteB);
-
-    // 5. If both are neither 'pending' nor 'in review', compare them using _getSortOrder.
-    return sortOrderA.compareTo(sortOrderB);
-  });
-
-  return requests;
-}
+  
 
 // Helper function to calculate sort order based on boolean flags (this can be expanded for more flags)
 int _getSortOrder(bool isComplete) {
@@ -854,7 +880,7 @@ Future<void> _saveExcel(BuildContext context) async {
 
   // Show a SnackBar or a message that the file is saved
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Excel file downloaded successfully!')),
+    const SnackBar(content: Text('Excel file downloaded successfully!')),
   );
 }
  

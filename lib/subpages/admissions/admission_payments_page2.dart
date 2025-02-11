@@ -14,7 +14,8 @@ class AdmissionPaymentsPage2 extends StatefulWidget {
   List<Map<String, dynamic>>? formDetails;
   final Function(bool isClicked) onNextPressed;
   final int userId;
-  AdmissionPaymentsPage2({super.key, required this.formDetails, required this.onNextPressed, required this.userId});
+  final String adminType;
+  AdmissionPaymentsPage2({super.key, required this.formDetails, required this.onNextPressed, required this.userId, required this.adminType});
 
   @override
   State<AdmissionPaymentsPage2> createState() => _AdmissionPaymentsPage2State();
@@ -74,8 +75,10 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
     }
   }
 
-  Future<void> updateData(int admissionId) async  {
-    myformDetails = await ApiService(apiUrl).getFormsDetailsById(admissionId, supabaseUrl, supabaseKey);
+  Future<void> updateData(int admissionId) async {
+    setState(() async {
+      myformDetails = await ApiService(apiUrl).getFormsDetailsById(admissionId, supabaseUrl, supabaseKey);  
+    });
   }
 
   String formatDate(DateTime date) {
@@ -167,7 +170,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                               width: isGreenExpanded ? 99 : 47,
                               height: 44,
                               child: ElevatedButton(
-                                onPressed: () async {
+                                onPressed: widget.adminType=='Admin' || widget.adminType=='Principal' || widget.adminType=='Cashier' || widget.adminType=='IT' || widget.adminType=='Sisters'?() async {
                                   bool _isLoading=false;
                                   showDialog(
                                 context: context,
@@ -425,7 +428,7 @@ class _AdmissionPaymentsPage2State extends State<AdmissionPaymentsPage2> {
                                   ),
                     ),
                   );
-                                },
+                                }:null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   shape: RoundedRectangleBorder(

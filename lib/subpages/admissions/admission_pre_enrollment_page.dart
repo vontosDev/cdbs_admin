@@ -204,7 +204,7 @@ String formatDate(DateTime date) {
       ),
 
       if (_selectedAction == 0) _buildDefaultContent(scale), // Default content
-      if (_selectedAction == 1) _buildViewContent(scale, formDetails!, authState.uid), // View content
+      if (_selectedAction == 1) _buildViewContent(scale, formDetails!, authState.uid, authState.adminType), // View content
       if (_selectedAction == 2) _buildReminderContent(scale), // Reminder content
       if (_selectedAction == 3) _buildDeactivateContent(scale),
       if (_selectedAction == 4) _buildDeactivateContent(scale),
@@ -475,7 +475,7 @@ const SizedBox(height: 40),
     );
   }
  // Build content for each action (VIEW, REMINDER, DEACTIVATE)
-  Widget _buildViewContent(double scale, List<Map<String, dynamic>> details, int userId) {
+  Widget _buildViewContent(double scale, List<Map<String, dynamic>> details, int userId, String adminType) {
     return Container(
   padding: const EdgeInsets.all(16),
   child: Column(
@@ -502,7 +502,7 @@ const SizedBox(height: 40),
       // Adding AdmissionApplicationsPage2 below the buttons
        AdmissionPaymentsPage2(formDetails: details, onNextPressed: (bool isClicked) {
          context.read<AdmissionBloc>().add(MarkAsCompleteClicked(isClicked));
-       },userId: userId),
+       },userId: userId, adminType: adminType,),
     ],
   ),
 );

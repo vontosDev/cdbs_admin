@@ -233,6 +233,7 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
                   ),
                 ),
+                const SizedBox(width: 40,),
                 Expanded(
                   flex: 2,
                   child: Text(
@@ -240,6 +241,7 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
                   ),
                 ),
+     
                 Expanded(
                   flex: 2,
                   child: Text(
@@ -322,15 +324,15 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                             flex: 1,
                             child: Row(
                               children: [
-                                Checkbox(
-                                  value: checkboxStates[index],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      checkboxStates[index] = value ?? false;
-                                    });
-                                  },
-                                  activeColor: const Color(0XFF012169), // Set the active color to pink
-                                ),
+                                // Checkbox(
+                                //   value: checkboxStates[index],
+                                //   onChanged: (value) {
+                                //     setState(() {
+                                //       checkboxStates[index] = value ?? false;
+                                //     });
+                                //   },
+                                //   activeColor: const Color(0XFF012169), // Set the active color to pink
+                                // ),
                                 Text(
                                   request['db_admission_table']['admission_form_id'].toString(),
                                   style: TextStyle(fontSize: 16 * scale),
@@ -339,15 +341,42 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                             ),
                           ),
                           Expanded(
-                            flex: 2,
-                            child: Text(fullName,
-                              style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
-                            ),
-                          ),
+  flex: 2,
+  child: Tooltip(
+    message: fullName, // Full name shown on hover
+    padding: const EdgeInsets.all(8.0),
+    decoration: BoxDecoration(
+      color: const Color(0xff012169),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    textStyle: const TextStyle(
+      color: Colors.white,
+      fontSize: 14,
+    ),
+    child: Text(
+      fullName,
+      style: TextStyle(
+        fontFamily: 'Roboto-R',
+        fontSize: 16 * scale,
+      ),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+    ),
+  ),
+),
+
+
+const SizedBox(width: 40,),
+
                           Expanded(
                             flex: 2,
                             child: Text(processBy ?? '---',
-                              style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
+                              style: TextStyle(
+                                fontFamily: 'Roboto-R',
+                                fontSize: 16 * scale,
+                              ),
+                              overflow: TextOverflow.ellipsis, // Add this to enable ellipsis
+                              maxLines: 1, // Ensures the text stays on a single line
                             ),
                           ),
                           Expanded(
