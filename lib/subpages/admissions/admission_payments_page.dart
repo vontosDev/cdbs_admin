@@ -100,22 +100,22 @@ String formatDate(DateTime date) {
 }
 
 List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests, String adminType) {
-
-    if (adminType == 'Center for Learner Wellness') {
+  if (adminType == 'Center for Learner Wellness') {
     requests = requests.where((request) {
-      return request['db_admission_table']['is_paid'] == true;
+      var admissionTable = request['db_admission_table'];
+      // Check if 'is_paid' is true and not null
+      return admissionTable != null && admissionTable['is_paid'] != null;
     }).toList();
   }
-
 
   requests.sort((a, b) {
     // Extract the admission statuses
     String admissionStatusA = a['db_admission_table']['admission_status'] ?? '';
     String admissionStatusB = b['db_admission_table']['admission_status'] ?? '';
 
-    // Extract the is_complete_view flag
-    bool isCompleteA = a['db_admission_table']['is_paid'];
-    bool isCompleteB = b['db_admission_table']['is_paid'];
+    // Extract the 'is_paid' field and handle null values
+    bool isCompleteA = a['db_admission_table']['is_paid'] == true; // defaults to false if null
+    bool isCompleteB = b['db_admission_table']['is_paid'] == true; // defaults to false if null
 
     // 1. First, check for 'pending' - it should come first.
     if (admissionStatusA == 'pending' && admissionStatusB != 'pending' && !isCompleteA) {
@@ -214,8 +214,8 @@ List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests, Str
                 requests = snapshot.data ?? []; // Use the data from the snapshot
                 filteredRequest = sortRequests(requests, authState.adminType);
                 filteredRequest = statusFilter.isEmpty
-                                            ? requests
-                                            : requests
+                                            ? sortRequests(requests, authState.adminType)
+                                            : sortRequests(requests, authState.adminType)
                                                 .where((request) =>
                                                     request['db_admission_table']['db_payment_method_table']['payment_method'] ==
                                                     statusFilter)
