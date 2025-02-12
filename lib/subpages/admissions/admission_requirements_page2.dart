@@ -1708,7 +1708,8 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
           1,
           2,
           5,
-          14
+          14,
+          15
         ];
       }else{
         requiredDocIds = [
@@ -1716,7 +1717,8 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
           2,
           3,
           5,
-          14
+          14,
+          15
         ];
       } // For other grade levels, require doc_ids 1, 2, 3, and 5
     }

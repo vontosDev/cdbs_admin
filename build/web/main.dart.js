@@ -50721,7 +50721,7 @@ return A.U(A.b([A.Y(A.b([A.p(a,s,s,s,A.o(s,s,s,s,s,s,s,s,"Roboto-R",s,s,11*b,s,s
 wU(a,b){var s,r,q,p,o,n,m,l,k,j,i,h="db_requirement_type_table"
 if(a.toLowerCase()==="pre-kinder"||a.toLowerCase()==="kinder")s=A.b([1,2,4],t.t)
 else{r=t.t
-s=a.toLowerCase()==="grade 1"?A.b([1,2,5,14],r):A.b([1,2,3,5,14],r)}for(r=s.length,q=0;q<s.length;s.length===r||(0,A.V)(s),++q){p=s[q]
+s=a.toLowerCase()==="grade 1"?A.b([1,2,5,14,15],r):A.b([1,2,3,5,14,15],r)}for(r=s.length,q=0;q<s.length;s.length===r||(0,A.V)(s),++q){p=s[q]
 n=b.length
 m=0
 while(!0){if(!(m<b.length)){o=!1
