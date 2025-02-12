@@ -50808,24 +50808,24 @@ if(b instanceof A.fd){s=this.a
 return A.ic(new A.atN(s,this.b,b),J.b_(J.c(J.c(J.c(s.Q,0),"db_admission_table"),"db_required_documents_table")))}return A.ay(r,r,B.q,r,r,r,r,r,r,r,r,r,r)},
 $S:313}
 A.atN.prototype={
-$2(a,b){var s,r,q,p,o,n,m="db_admission_table",l="document_url",k=null,j="Roboto-R",i="document_status",h=this.a,g=J.c(J.c(J.c(h.Q,0),m),"db_required_documents_table"),f=J.c(J.c(J.c(h.Q,0),m),"level_applying_for"),e=J.ac(g)
-A.of(B.eh,J.c(e.h(g,b),l)!=null?J.a5v(J.c(e.h(g,b),l),2,J.N4(J.b_(J.c(e.h(g,b),l)),2)):"",B.a9,!1)
-s=J.c(e.h(g,b),"reject_reason")
+$2(a,b){var s,r,q,p,o,n,m="db_admission_table",l="document_url",k=null,j="Roboto-R",i="requirements_type",h="document_status",g=this.a,f=J.c(J.c(J.c(g.Q,0),m),"db_required_documents_table"),e=J.c(J.c(J.c(g.Q,0),m),"level_applying_for"),d=J.ac(f)
+A.of(B.eh,J.c(d.h(f,b),l)!=null?J.a5v(J.c(d.h(f,b),l),2,J.N4(J.b_(J.c(d.h(f,b),l)),2)):"",B.a9,!1)
+s=J.c(d.h(f,b),"reject_reason")
 if(s==null)s="N/A"
 r=14*this.b
-q=A.x(A.p(J.c(J.c(e.h(g,b),"db_requirement_type_table"),"doc_type"),k,k,k,A.o(k,k,k,k,k,k,k,k,j,k,k,r,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k,k),3)
-if(J.d(J.c(e.h(g,b),"requirements_type"),5)&&J.c(e.h(g,b),l)==null)p=A.aY(B.a_K,new A.atH(h,a,g,b),A.br(k,k,B.Hf,k,k,k,k,k,k,k,k,k,k,k,k,new A.aj(A.r(5),B.m),k,k,k,k))
-else{p=J.c(e.h(g,b),l)!=null?new A.atI(g,b,a):k
+q=A.x(A.p(J.c(J.c(d.h(f,b),"db_requirement_type_table"),"doc_type"),k,k,k,A.o(k,k,k,k,k,k,k,k,j,k,k,r,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k,k),3)
+if((J.d(J.c(d.h(f,b),i),5)||J.d(J.c(d.h(f,b),i),15))&&J.c(d.h(f,b),l)==null)p=A.aY(B.a_K,new A.atH(g,a,f,b),A.br(k,k,B.Hf,k,k,k,k,k,k,k,k,k,k,k,k,new A.aj(A.r(5),B.m),k,k,k,k))
+else{p=J.c(d.h(f,b),l)!=null?new A.atI(f,b,a):k
 p=A.aY(B.CH,p,A.br(k,k,B.k,k,k,k,k,k,k,k,k,k,k,k,k,new A.aj(A.r(5),B.m),k,k,k,k))}p=A.x(p,2)
-o=A.x(A.p(J.Az(J.c(e.h(g,b),i)),k,k,k,A.o(k,k,k,k,k,k,k,k,j,k,k,r,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k,k),1)
+o=A.x(A.p(J.Az(J.c(d.h(f,b),h)),k,k,k,A.o(k,k,k,k,k,k,k,k,j,k,k,r,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k,k),1)
 r=A.x(A.p(s,k,k,k,A.o(k,k,k,k,k,k,k,k,j,k,k,r,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k,k),2)
 n=this.c.b
-if(n==="Admin"||n==="Principal"||n==="Registrar"||n==="IT"||n==="Sisters"||n==="Center for Learner Wellness"){n=J.d(J.c(e.h(g,b),i),"pending")?new A.atJ(h,a,g,b,f):k
+if(n==="Admin"||n==="Principal"||n==="Registrar"||n==="IT"||n==="Sisters"||n==="Center for Learner Wellness"){n=J.d(J.c(d.h(f,b),h),"pending")?new A.atJ(g,a,f,b,e):k
 n=A.aY(B.a_p,n,A.br(k,k,B.GP,k,k,k,k,k,k,k,k,k,k,B.aQ,k,B.S8,k,k,k,k))
-h=J.d(J.c(e.h(g,b),i),"pending")?new A.atK(h,a,g,b,f):k
-h=A.x(A.Y(A.b([n,B.jQ,A.aY(B.a_C,h,A.br(k,k,B.e5,k,k,k,k,k,k,k,k,k,k,B.aQ,k,B.S9,k,k,k,k))],t.p),B.i,B.f,B.e,k),2)}else h=A.x(A.ay(k,k,B.q,k,k,k,k,k,k,k,k,k,k),2)
-e=t.p
-return A.U(A.b([B.be,A.Y(A.b([q,B.ay,p,B.ay,o,B.ay,r,B.ay,h],e),B.i,B.f,B.e,k),B.at],e),B.i,B.f,B.e)},
+g=J.d(J.c(d.h(f,b),h),"pending")?new A.atK(g,a,f,b,e):k
+g=A.x(A.Y(A.b([n,B.jQ,A.aY(B.a_C,g,A.br(k,k,B.e5,k,k,k,k,k,k,k,k,k,k,B.aQ,k,B.S9,k,k,k,k))],t.p),B.i,B.f,B.e,k),2)}else g=A.x(A.ay(k,k,B.q,k,k,k,k,k,k,k,k,k,k),2)
+d=t.p
+return A.U(A.b([B.be,A.Y(A.b([q,B.ay,p,B.ay,o,B.ay,r,B.ay,g],d),B.i,B.f,B.e,k),B.at],d),B.i,B.f,B.e)},
 $S:40}
 A.atH.prototype={
 $0(){var s=this,r=s.a
@@ -52693,7 +52693,7 @@ case 1:return B.fn
 case 2:return B.fn
 case 3:return B.fn
 case 4:return B.a20
-default:return B.D5}if(r===3)if(a==="Registrar"||a==="Admin"||a==="Sisters"||a==="Principal"||a==="IT")switch(s.x){case 0:return B.ok
+default:return B.D5}if(r===3)if(a==="Registrar"||a==="Admin"||a==="Sisters"||a==="Principal"||a==="IT"||a==="Center for Learner Wellness")switch(s.x){case 0:return B.ok
 case 1:return B.oi
 case 2:return B.oh
 case 3:return B.kw
@@ -52803,7 +52803,7 @@ if(b instanceof A.fd){s=b.b
 if(s==="Admin"||s==="Principal"||s==="IT"||s==="Sisters")f.a.a=A.b(["Slots","Overview","Applications","Requirements","Payments","Schedules","Results"],t.s)
 else if(s==="Cashier")f.a.a=A.b(["Requirements","Payments"],t.s)
 else if(s==="Registrar")f.a.a=A.b(["Slots","Overview","Applications","Requirements","Payments","Schedules"],t.s)
-else if(s==="Admission"||s==="Center for Learner Wellness")f.a.a=A.b(["Slots","Overview","Applications","Requirements","Schedules","Results"],t.s)
+else if(s==="Center for Learner Wellness")f.a.a=A.b(["Slots","Overview","Applications","Requirements","Payments","Schedules","Results"],t.s)
 s=f.b
 r=t.w
 q=A.a6(a,e,r).w

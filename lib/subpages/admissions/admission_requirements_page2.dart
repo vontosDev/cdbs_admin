@@ -715,7 +715,7 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
                               const SizedBox(width: 40),
                               Expanded(
                                 flex: 2,
-                                child: document[index]['requirements_type'] == 5 && document[index]['document_url'] == null
+                                child: (document[index]['requirements_type'] == 5 || document[index]['requirements_type'] == 15) && document[index]['document_url'] == null
                                 ? ElevatedButton(
                                     onPressed: () {
                                       // Upload button action

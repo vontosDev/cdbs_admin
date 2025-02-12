@@ -538,8 +538,8 @@ return Column(
               dropdownOptions = ["Requirements","Payments"];
             }else if(authState.adminType=='Registrar'){
               dropdownOptions = ["Slots","Overview", "Applications", "Requirements", "Payments", "Schedules"];
-            }else if(authState.adminType=='Admission' || authState.adminType=='Center for Learner Wellness'){
-              dropdownOptions = ["Slots", "Overview", "Applications", "Requirements", "Schedules", "Results"];
+            }else if(authState.adminType=='Center for Learner Wellness'){
+              dropdownOptions = ["Slots", "Overview", "Applications", "Requirements", "Payments", "Schedules", "Results"];
             }
             return Column(
                     children: [
@@ -774,7 +774,7 @@ return Column(
 
     if (_selectedPage == 3) {
       // Show content based on selected dropdown option for Page 5
-      if(adminType =='Registrar' || adminType =='Admin' || adminType=='Sisters' || adminType=='Principal' || adminType=='IT'){
+      if(adminType =='Registrar' || adminType =='Admin' || adminType=='Sisters' || adminType=='Principal' || adminType=='IT' || adminType=='Center for Learner Wellness'){
         switch (_selectedAdmissionDropdownOption) {
           case 0:
             return const AdmissionSlotsPage1();
