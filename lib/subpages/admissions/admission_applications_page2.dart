@@ -453,11 +453,14 @@ void addItemDescription(double scale) {
      contactController.text=widget.formDetails![0]['db_admission_table']['contact_no']??'';
      languageSpokenController.text=widget.formDetails![0]['db_admission_table']['language_dialect_spoken']??'';
      companionController.text=widget.formDetails![0]['db_admission_table']['usual_companion_at_home']??'';
-
-      
-     DateTime dateOfBirth = DateTime.parse(dateController.text);
-     DateTime today = DateTime.now();
-     int age = today.year - dateOfBirth.year;
+      DateTime? dateOfBirth;
+     if(dateController.text.isNotEmpty){
+      dateOfBirth = DateTime.parse(dateController.text);
+     }else{
+      dateOfBirth=DateTime.now();
+     }
+      DateTime today = DateTime.now();
+      int age = today.year - dateOfBirth.year;
      if(widget.formDetails![0]['db_admission_table']['db_family_background_table'].isNotEmpty){
       noSibling = widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['no_of_siblings'].toString();
       parentStatus=widget.formDetails![0]['db_admission_table']['db_family_background_table'][0]['parent_status'] ?? '';
