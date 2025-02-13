@@ -43,6 +43,9 @@ class _AdmissionRequirementsPage2State
   TextEditingController rejectController = TextEditingController();
   String? applicationId;
   String? fullName;
+  String? parentName;
+  String? parentEmail;
+  String? parentContact;
   String? status;
   String? dateCreatedString;
   String? formattedDate;
@@ -58,6 +61,9 @@ class _AdmissionRequirementsPage2State
     myformDetails = widget.formDetails!;
     applicationId = myformDetails[0]['db_admission_table']['admission_form_id'];
     fullName = '${myformDetails[0]['db_admission_table']['first_name']} ${myformDetails[0]['db_admission_table']['last_name']}';
+    parentName = '${myformDetails[0]['db_admission_users_table']['last_name']}, ${myformDetails[0]['db_admission_users_table']['first_name']}';
+    parentEmail = '${myformDetails[0]['db_admission_users_table']['email_address']}';
+    parentContact = '${myformDetails[0]['db_admission_users_table']['contact_no']}';
     status = myformDetails[0]['db_admission_table']['admission_status'];
     dateCreatedString = myformDetails[0]['db_admission_table']['created_at'];
     DateTime dateCreated = DateTime.parse(dateCreatedString!);
@@ -609,6 +615,54 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
           ),
 
           // Second Row
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Application ID
+              Expanded(
+                flex: 2,
+                child: _buildParentColumn(
+                  label: "Parent Name",
+                  value: parentName!,
+                  scale: scale,
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Applicant Name
+              Expanded(
+                flex: 3,
+                child: _buildInfoColumn(
+                  label: 'Email Address',
+                  value: parentEmail!,
+                  scale: scale,
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Grade Level
+              Expanded(
+                flex: 2,
+                child: _buildInfoColumn(
+                  label: 'Contact Number',
+                  value: parentContact!,
+                  scale: scale,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                flex: 2,
+                child: SizedBox()
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                flex: 2,
+                child: SizedBox()
+              ),
+              
+            ],
+          ),
 
           const SizedBox(height: 80),
           const Divider(),
@@ -1522,6 +1576,62 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
               style: TextStyle(
                 fontSize: 12 * scale,
                 fontFamily: 'Roboto-B',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Container(
+          height: 1,
+          color: const Color(0xFF909590), // Underline color
+        ),
+      ],
+    );
+  }
+
+
+
+  Widget _buildParentColumn({
+    required String label,
+    required String value,
+    required double scale,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11 * scale,
+                fontFamily: 'Roboto-R',
+              ),
+            ),
+            const SizedBox(width: 30),
+            Tooltip(
+              message: fullName, // Full name shown on hover
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: const Color(0xff012169),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              textStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+              child: SizedBox(
+                width: 120,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontFamily: 'Roboto-B',
+                    fontSize: 12 * scale,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
             ),
           ],

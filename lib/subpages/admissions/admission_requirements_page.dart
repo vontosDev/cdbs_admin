@@ -545,11 +545,13 @@ String formatDate(DateTime date) {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton.icon(
-            onPressed: () {
+            onPressed: ()async {
               context.read<AdmissionBloc>().add(MarkAsCompleteClicked(false));
-              setState(()async {
-                _selectedAction = 0; // Go back to default content
+              // Go back to default content
                 try {
+                  setState(() {
+                    _selectedAction = 0;
+                  }); 
                                           final response = await http.post(
                                             Uri.parse('$apiUrl/api/admin/update_admission'),
                                             headers: {
@@ -575,7 +577,7 @@ String formatDate(DateTime date) {
                                           // Handle error (e.g., network error)
                                           print('Error: $error');
                                         }
-              });
+              
             },
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             label: Text(
@@ -970,7 +972,9 @@ String formatDate(DateTime date) {
       return request['db_admission_table']['is_all_required_file_uploaded'] == true;
     }).toList();
   }
-
+  requests = requests.where((request) {
+      return request['db_admission_table']['db_required_documents_table'].isNotEmpty;
+    }).toList();
 
   requests.sort((a, b) {
     // Extract the admission statuses

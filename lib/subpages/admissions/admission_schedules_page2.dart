@@ -229,7 +229,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                         flex: 1,
                         child: _buildInfoColumn(
                           label: 'Slots',
-                          value: '2/10',
+                          value: '${activeSchedules.length}/${myformDetails[0]['slots']}',
                           scale: scale,
                         ),
                       ),
