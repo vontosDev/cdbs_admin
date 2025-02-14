@@ -451,7 +451,7 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                           children: [
                             Expanded(
                               flex: 2,
-                              child: Text(request['level_applying'],
+                              child: SelectableText(request['level_applying'],
                                 style: TextStyle(
                                     fontFamily: 'Roboto-R',
                                     fontSize: 16 * scale),
@@ -459,7 +459,7 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                             ),
                             Expanded(
                               flex: 2,
-                              child: Text('${request['admission_count'].toString()}/${request['slot_available'].toString()}',
+                              child: SelectableText('${request['admission_count'].toString()}/${request['slot_available'].toString()}',
                                 style: TextStyle(
                                     fontFamily: 'Roboto-R',
                                     fontSize: 16 * scale),
@@ -467,7 +467,7 @@ class _AdmissionSlotsPage1State extends State<AdmissionSlotsPage1> {
                             ),
                             Expanded(
                               flex: 2,
-                              child: Text( request['admission_count']!=request['slot_available']?
+                              child: SelectableText( request['admission_count']!=request['slot_available']?
                                 request['slot_status'].toUpperCase():'CLOSED',
                                 style: TextStyle(
                                     fontFamily: 'Roboto-R',

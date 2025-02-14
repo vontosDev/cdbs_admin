@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:cdbs_admin/subpages/s2.dart';
 import 'package:intl/intl.dart';
 import 'package:cdbs_admin/bloc/auth/auth_bloc.dart';
@@ -227,9 +228,17 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                   ),
                 ),
                 Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: Text(
                     'Applicant Name',
+                    style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
+                  ),
+                ),
+                const SizedBox(width: 20,),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Grade Level',
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
                   ),
                 ),
@@ -333,7 +342,7 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                                 //   },
                                 //   activeColor: const Color(0XFF012169), // Set the active color to pink
                                 // ),
-                                Text(
+                                SelectableText(
                                   request['db_admission_table']['admission_form_id'].toString(),
                                   style: TextStyle(fontSize: 16 * scale),
                                 ),
@@ -366,18 +375,42 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
 // ),
 
 Expanded(
-                            flex: 3,
+  flex: 2,
+  child: Stack(
+    children: [
+      // Invisible Text to maintain layout with ellipsis
+      Positioned.fill(
+        child: Text(
+          fullName,
+          style: TextStyle(fontSize: 16 * scale, color: Colors.transparent),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+      ),
+      // Selectable Text (does not support ellipsis directly)
+      SelectableText(
+        fullName,
+        style: TextStyle(fontSize: 16 * scale),
+      ),
+    ],
+  ),
+),
+
+
+
+const SizedBox(width: 40,),
+
+                Expanded(
+                            flex: 1,
                             child: Row(
                               children: [
                                 SelectableText(
-                                  fullName,
+                                  request['db_admission_table']['level_applying_for'] ?? '',
                                   style: TextStyle(fontSize: 16 * scale),
                                 ),
                               ],
                             ),
                           ),
-
-
 
 const SizedBox(width: 40,),
 
@@ -397,7 +430,7 @@ const SizedBox(width: 40,),
                             flex: 2,
                             child: Row(
                               children: [
-                                Text(titleText,
+                                SelectableText(titleText,
                                   style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                                 ),
                                 Text(statusText.toUpperCase(),
@@ -408,7 +441,7 @@ const SizedBox(width: 40,),
                           ),
                           Expanded(
                             flex: 1,
-                            child: Text(formattedDate,
+                            child: SelectableText(formattedDate,
                               style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale),
                             ),
                           ),

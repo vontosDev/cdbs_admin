@@ -245,6 +245,13 @@ String formatDate(DateTime date) {
             ),
           ),
           Expanded(
+            flex: 1,
+            child: Text(
+              'Grade Level',
+              style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
+            ),
+          ),
+          Expanded(
             flex: 2,
             child: Text(
               'Handled By',
@@ -342,6 +349,18 @@ String formatDate(DateTime date) {
                               ],
                             ),
                           ),
+
+                                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              children: [
+                                SelectableText(
+                                  request['db_admission_table']['level_applying_for'] ?? '',
+                                  style: TextStyle(fontSize: 16 * scale),
+                                ),
+                              ],
+                            ),
+                          ),
                           
                     Expanded(
                       flex: 2,
@@ -351,7 +370,7 @@ String formatDate(DateTime date) {
                       ),
                     ),
                     Expanded(
-                      flex: 2,
+                      flex: 1,
                       child: SelectableText(
                         request['db_admission_table']['is_final_result']?'COMPLETE':request['db_admission_table']['admission_status'],
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale,

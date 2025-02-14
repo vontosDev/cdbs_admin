@@ -301,6 +301,13 @@ String formatDate(DateTime date) {
             ),
           ),
           Expanded(
+            flex: 1,
+            child: Text(
+              'Grade Level',
+              style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
+            ),
+          ),
+          Expanded(
             flex: 2,
             child: Text(
               'Handled By',
@@ -308,7 +315,7 @@ String formatDate(DateTime date) {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Text(
               'Status',
               style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
@@ -391,16 +398,40 @@ String formatDate(DateTime date) {
                     //   ),
                     // ),
                     Expanded(
-                            flex: 3,
+                      flex: 3,
+                      child: Stack(
+                        children: [
+                          // Invisible Text to maintain layout with ellipsis
+                          Positioned.fill(
+                            child: Text(
+                              fullName,
+                              style: TextStyle(fontSize: 16 * scale, color: Colors.transparent),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          // Selectable Text (does not support ellipsis directly)
+                          SelectableText(
+                            fullName,
+                            style: TextStyle(fontSize: 16 * scale),
+                          ),
+                        ],
+                      ),
+                    ),
+
+
+                Expanded(
+                            flex: 1,
                             child: Row(
                               children: [
                                 SelectableText(
-                                  fullName,
+                                  request['db_admission_table']['level_applying_for'] ?? '',
                                   style: TextStyle(fontSize: 16 * scale),
                                 ),
                               ],
                             ),
                           ),
+
                           
                     Expanded(
                       flex: 2,
@@ -410,7 +441,7 @@ String formatDate(DateTime date) {
                       ),
                     ),
                     Expanded(
-                      flex: 2,
+                      flex: 1,
                       child: SelectableText(!isRequired?stat=='complete' && isComplete?'PENDING':stat.toUpperCase():'COMPLETE',
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale,
                         color: isRequired?const Color(0xFF007A33):_getStatusColor(request['db_admission_table']['admission_status'])
