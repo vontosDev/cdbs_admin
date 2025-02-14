@@ -227,7 +227,7 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
                     'Applicant Name',
                     style: TextStyle(fontSize: 16 * scale, fontFamily: 'Roboto-L'),
@@ -340,33 +340,47 @@ class _AdmissionOverviewPageState extends State<AdmissionOverviewPage> {
                               ],
                             ),
                           ),
-                          Expanded(
-  flex: 2,
-  child: Tooltip(
-    message: fullName, // Full name shown on hover
-    padding: const EdgeInsets.all(8.0),
-    decoration: BoxDecoration(
-      color: const Color(0xff012169),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    textStyle: const TextStyle(
-      color: Colors.white,
-      fontSize: 14,
-    ),
-    child: Text(
-      fullName,
-      style: TextStyle(
-        fontFamily: 'Roboto-R',
-        fontSize: 16 * scale,
-      ),
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-    ),
-  ),
-),
+//                           Expanded(
+//   flex: 2,
+//   child: Tooltip(
+//     message: fullName, // Full name shown on hover
+//     padding: const EdgeInsets.all(8.0),
+//     decoration: BoxDecoration(
+//       color: const Color(0xff012169),
+//       borderRadius: BorderRadius.circular(8),
+//     ),
+//     textStyle: const TextStyle(
+//       color: Colors.white,
+//       fontSize: 14,
+//     ),
+//     child: Text(
+//       fullName,
+//       style: TextStyle(
+//         fontFamily: 'Roboto-R',
+//         fontSize: 16 * scale,
+//       ),
+//       overflow: TextOverflow.ellipsis,
+//       maxLines: 1,
+//     ),
+//   ),
+// ),
+
+Expanded(
+                            flex: 3,
+                            child: Row(
+                              children: [
+                                SelectableText(
+                                  fullName,
+                                  style: TextStyle(fontSize: 16 * scale),
+                                ),
+                              ],
+                            ),
+                          ),
+
 
 
 const SizedBox(width: 40,),
+
 
                           Expanded(
                             flex: 2,

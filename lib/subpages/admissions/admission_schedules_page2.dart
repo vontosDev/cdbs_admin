@@ -454,7 +454,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                           ),
                         ),
                 const SizedBox(width: 16),
-                 if(isExamToday(formattedExamDate!))
+                 !isExamToday(formattedExamDate!)?
                  !isLoading[i]?
                  Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -596,7 +596,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       ):const SpinKitCircle(
                         color: Color(0xff012169), // Change the color as needed
                         size: 50.0, // Adjust size as needed
-                      )
+                      ):const SizedBox()
                        // This could still be removed if unnecessary
               ],
                         ),

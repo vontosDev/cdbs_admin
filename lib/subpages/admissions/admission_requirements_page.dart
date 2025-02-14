@@ -366,30 +366,42 @@ String formatDate(DateTime date) {
                               ],
                             ),
                           ),
+                    // Expanded(
+                    //   flex: 3,
+                    //   child: Tooltip(
+                    //     message: fullName, // Full name shown on hover
+                    //     padding: const EdgeInsets.all(8.0),
+                    //     decoration: BoxDecoration(
+                    //       color: const Color(0xff012169),
+                    //       borderRadius: BorderRadius.circular(8),
+                    //     ),
+                    //     textStyle: const TextStyle(
+                    //       color: Colors.white,
+                    //       fontSize: 14,
+                    //     ),
+                    //     child: Text(
+                    //       fullName,
+                    //       style: TextStyle(
+                    //         fontFamily: 'Roboto-R',
+                    //         fontSize: 16 * scale,
+                    //       ),
+                    //       overflow: TextOverflow.ellipsis,
+                    //       maxLines: 1,
+                    //     ),
+                    //   ),
+                    // ),
                     Expanded(
-  flex: 3,
-  child: Tooltip(
-    message: fullName, // Full name shown on hover
-    padding: const EdgeInsets.all(8.0),
-    decoration: BoxDecoration(
-      color: const Color(0xff012169),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    textStyle: const TextStyle(
-      color: Colors.white,
-      fontSize: 14,
-    ),
-    child: Text(
-      fullName,
-      style: TextStyle(
-        fontFamily: 'Roboto-R',
-        fontSize: 16 * scale,
-      ),
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-    ),
-  ),
-),
+                            flex: 3,
+                            child: Row(
+                              children: [
+                                SelectableText(
+                                  fullName,
+                                  style: TextStyle(fontSize: 16 * scale),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
                     Expanded(
                       flex: 2,
                       child: SelectableText(
@@ -545,13 +557,14 @@ String formatDate(DateTime date) {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton.icon(
-            onPressed: ()async {
+            onPressed: () async{
               context.read<AdmissionBloc>().add(MarkAsCompleteClicked(false));
-              // Go back to default content
-                try {
-                  setState(() {
-                    _selectedAction = 0;
-                  }); 
+              try {
+                
+              setState(() {
+                _selectedAction = 0; // Go back to default content
+                
+              });
                                           final response = await http.post(
                                             Uri.parse('$apiUrl/api/admin/update_admission'),
                                             headers: {
@@ -577,7 +590,6 @@ String formatDate(DateTime date) {
                                           // Handle error (e.g., network error)
                                           print('Error: $error');
                                         }
-              
             },
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             label: Text(
@@ -972,7 +984,8 @@ String formatDate(DateTime date) {
       return request['db_admission_table']['is_all_required_file_uploaded'] == true;
     }).toList();
   }
-  requests = requests.where((request) {
+
+    requests = requests.where((request) {
       return request['db_admission_table']['db_required_documents_table'].isNotEmpty;
     }).toList();
 

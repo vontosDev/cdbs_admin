@@ -100,44 +100,18 @@ String formatDate(DateTime date) {
 }
 
 List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests, String adminType) {
-  if (adminType == 'Center for Learner Wellness') {
+
+    if (adminType == 'Center for Learner Wellness') {
     requests = requests.where((request) {
-      var admissionTable = request['db_admission_table'];
-      // Check if 'is_paid' is true and not null
-      return admissionTable != null && admissionTable['is_paid'] != null;
+      return request['db_admission_table']['is_paid'] == true;
     }).toList();
   }
 
+
   requests.sort((a, b) {
-    // Extract the admission statuses
-    String admissionStatusA = a['db_admission_table']['admission_status'] ?? '';
-    String admissionStatusB = b['db_admission_table']['admission_status'] ?? '';
-
-    // Extract the 'is_paid' field and handle null values
-    bool isCompleteA = a['db_admission_table']['is_paid'] == true; // defaults to false if null
-    bool isCompleteB = b['db_admission_table']['is_paid'] == true; // defaults to false if null
-
-    // 1. First, check for 'pending' - it should come first.
-    if (admissionStatusA == 'pending' && admissionStatusB != 'pending' && !isCompleteA) {
-      return -1; // 'a' (pending) should come before 'b'
-    } else if (admissionStatusB == 'pending' && admissionStatusA != 'pending' && !isCompleteB) {
-      return 1; // 'b' (pending) should come before 'a'
-    }
-
-    // 2. Next, check for 'in review' - it should come after 'pending', but before other statuses.
-    if (admissionStatusA == 'in review' && admissionStatusB != 'pending' && admissionStatusB != 'in review') {
-      return -1; // 'a' (in review) should come before 'b'
-    } else if (admissionStatusB == 'in review' && admissionStatusA != 'pending' && admissionStatusA != 'in review') {
-      return 1; // 'b' (in review) should come before 'a'
-    }
-
-    // 3. If one of the statuses is 'pending' or 'in review' and its is_complete_view is true, push it to the end.
-    // However, we only do this after sorting 'pending' and 'in review'.
-    if ((admissionStatusA == 'pending' || admissionStatusA == 'in review') && isCompleteA) {
-      return 1; // 'a' (pending/in review with complete) should go after 'b'
-    } else if ((admissionStatusB == 'pending' || admissionStatusB == 'in review') && isCompleteB) {
-      return -1; // 'b' (pending/in review with complete) should go after 'a'
-    }
+    // Extract the is_complete_view flag
+    bool isCompleteA = a['db_admission_table']['is_paid'];
+    bool isCompleteB = b['db_admission_table']['is_paid'];
 
     // 4. Now, use _getSortOrder to compare other statuses based on is_complete_view
     // This will be applied to statuses that are neither 'pending' nor 'in review'.
@@ -560,30 +534,41 @@ const SizedBox(height: 40),
                               ],
                             ),
                           ),
-                   Expanded(
-  flex: 3,
-  child: Tooltip(
-    message: fullName, // Full name shown on hover
-    padding: const EdgeInsets.all(8.0),
-    decoration: BoxDecoration(
-      color: const Color(0xff012169),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    textStyle: const TextStyle(
-      color: Colors.white,
-      fontSize: 14,
-    ),
-    child: Text(
-      fullName,
-      style: TextStyle(
-        fontFamily: 'Roboto-R',
-        fontSize: 16 * scale,
-      ),
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-    ),
-  ),
-),
+                  //  Expanded(
+                  //   flex: 3,
+                  //   child: Tooltip(
+                  //     message: fullName, // Full name shown on hover
+                  //     padding: const EdgeInsets.all(8.0),
+                  //     decoration: BoxDecoration(
+                  //       color: const Color(0xff012169),
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //     textStyle: const TextStyle(
+                  //       color: Colors.white,
+                  //       fontSize: 14,
+                  //     ),
+                  //     child: Text(
+                  //       fullName,
+                  //       style: TextStyle(
+                  //         fontFamily: 'Roboto-R',
+                  //         fontSize: 16 * scale,
+                  //       ),
+                  //       overflow: TextOverflow.ellipsis,
+                  //       maxLines: 1,
+                  //     ),
+                  //   ),
+                  // ),
+                  Expanded(
+                            flex: 3,
+                            child: Row(
+                              children: [
+                                SelectableText(
+                                  fullName,
+                                  style: TextStyle(fontSize: 16 * scale),
+                                ),
+                              ],
+                            ),
+                          ),
                     Expanded(
                       flex: 2,
                       child: SelectableText(

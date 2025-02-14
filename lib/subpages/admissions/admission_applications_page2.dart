@@ -453,7 +453,9 @@ void addItemDescription(double scale) {
      contactController.text=widget.formDetails![0]['db_admission_table']['contact_no']??'';
      languageSpokenController.text=widget.formDetails![0]['db_admission_table']['language_dialect_spoken']??'';
      companionController.text=widget.formDetails![0]['db_admission_table']['usual_companion_at_home']??'';
-      DateTime? dateOfBirth;
+
+      
+     DateTime? dateOfBirth;
      if(dateController.text.isNotEmpty){
       dateOfBirth = DateTime.parse(dateController.text);
      }else{
