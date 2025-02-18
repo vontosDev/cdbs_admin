@@ -53458,7 +53458,7 @@ r=A.u(c.hG("Application Status",n,r),6)}else r=B.k1
 n=A.u(c.hG("Date Created",n,q),6)
 k=c.x
 k.toString
-if(!c.a1l(k))if(!c.z[a0]){k=A.a([],t.p)
+if(c.a1l(k))if(!c.z[a0]){k=A.a([],t.p)
 j=g.c
 if(!j[a0]){i=g.d
 h=i[a0]?99:44

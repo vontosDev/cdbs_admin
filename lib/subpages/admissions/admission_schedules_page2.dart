@@ -454,7 +454,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                           ),
                         ),
                 const SizedBox(width: 16),
-                 !isExamToday(formattedExamDate!)?
+                 isExamToday(formattedExamDate!)?
                  !isLoading[i]?
                  Row(
                         mainAxisAlignment: MainAxisAlignment.center,
