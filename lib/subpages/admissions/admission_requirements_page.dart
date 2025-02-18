@@ -38,8 +38,9 @@ class _AdmissionRequirementsPageState extends State<AdmissionRequirementsPage> {
   void initState() {
     super.initState();
     _apiService = ApiService(apiUrl); // Replace with your actual API URL
-    admissionForms = _apiService.streamAdmissionForms(supabaseUrl, supabaseKey);
+    //admissionForms = _apiService.streamAdmissionForms(supabaseUrl, supabaseKey);
     // Initialize the service with your endpoint
+    _onSearchChanged('');
   }
 
   String capitalizeEachWord(String input) {
@@ -122,9 +123,17 @@ String formatDate(DateTime date) {
   }
 
   void _onSearchChanged(String value) {
-    setState(() {
+    /*setState(() {
       searchQuery = value.toLowerCase();
-    });
+    });*/
+    if (value.isEmpty) {
+       _apiService.startStreaming(supabaseUrl, supabaseKey); // Restart normal streaming
+      admissionForms = _apiService.admissionFormsStream;
+    } else {
+      
+      _apiService.searchAdmissionForms(supabaseUrl,supabaseKey,value); // Perform search
+      admissionForms = _apiService.admissionFormsStream;
+    }
   }
 
   @override
@@ -173,12 +182,17 @@ String formatDate(DateTime date) {
                   );
                 }
                 requests = snapshot.data ?? []; // Use the data from the snapshot
-                filteredRequest = sortRequests(requests, authState.adminType);
-                filteredRequest = filteredRequest.where((request) {
+                if(searchController.text.isEmpty && requests.isNotEmpty){
+                  filteredRequest = sortRequests(requests, authState.adminType);
+                }else{
+                  filteredRequest=requests;
+                }
+                
+                /*filteredRequest = filteredRequest.where((request) {
                         final formId = request['db_admission_table']['admission_form_id']?.toLowerCase() ?? '';
                         return formId.contains(searchQuery);
                       
-                    }).toList();
+                    }).toList();*/
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
@@ -649,284 +663,7 @@ String formatDate(DateTime date) {
                 ),
               ),
               const SizedBox(width: 8), // Spacing between buttons
-              /*ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF007A33), // Green color
-                  fixedSize: Size(178 * scale, 37 * scale), // Button size
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5), // Border radius
-                  ),
-                ),
-                onPressed: isButtonEnabled?() async {
-                  bool isLoading=false;
-
-                  showDialog(
-                                context: context,
-                                builder: (context) => Dialog(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                                  child: BlocConsumer<AdmissionBloc, AdmissionState>(
-                                    listener: (context, state) {},
-                                    builder: (context, state) {
-                                       // Enable button based on the state
-                                              if (state is AdmissionRemarksIsLoading) {
-                                                isLoading = state.isLoading;
-                                              }
-                                      return SizedBox(
-                                                                      width: 349.0,
-                                                                      height: 272.0,
-                                                                      child: isLoading
-                                                              ? const CustomSpinner(
-                                                                  color:
-                                                                      Color(0xff13322b), // Change the spinner color if needed
-                                                                  size: 60.0, // Change the size of the spinner if needed
-                                                                ): Column(
-                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                        children: [
-                                                                          // Title
-                                                                          const Padding(
-                                                                            padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
-                                                                            child: Text(
-                                                                              "Confirmation",
-                                                                              style: TextStyle(
-                                                                                fontFamily: 'Roboto',
-                                                                                fontSize: 22,
-                                                                                fontWeight: FontWeight.bold,
-                                                                              ),
-                                                                              textAlign: TextAlign.center,
-                                                                            ),
-                                                                          ),
-                                                                          // Content
-                                                                          const Padding(
-                                                                            padding: EdgeInsets.symmetric(horizontal: 24.0),
-                                                                            child: Text(
-                                                                              "Are you sure you want to mark as complete?",
-                                                                              style: TextStyle(
-                                                                                fontFamily: 'Roboto',
-                                                                                fontSize: 13,
-                                                                                fontWeight: FontWeight.normal,
-                                                                              ),
-                                                                              textAlign: TextAlign.center,
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(height: 16.0),
-                                                                          // Divider
-                                                                          const Padding(
-                                                                            padding: EdgeInsets.only(left: 20, right: 20),
-                                                                            child: Divider(thickness: 1),
-                                                                          ),
-                                                                          const SizedBox(height: 16.0),
-                                                                          // No Button
-                                                                          Padding(
-                                                                            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                                                                            child: SizedBox(
-                                                                              width: 289,
-                                                                              height: 35,
-                                                                              child: TextButton(
-                                                                                style: TextButton.styleFrom(
-                                                                                  backgroundColor: const Color(0xffD3D3D3), // No button color
-                                                                                  shape: RoundedRectangleBorder(
-                                                                                    borderRadius: BorderRadius.circular(8),
-                                                                                  ),
-                                                                                ),
-                                                                                onPressed: () {
-                                                                                  Navigator.of(context).pop(); // Close dialog
-                                                                                },
-                                                                                child: const Text(
-                                                                                  "No",
-                                                                                  style: TextStyle(color: Colors.black),
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(height: 12.0), // Spacing between buttons
-                                                                          // Yes Button
-                                                                          Padding(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                                                                  child: SizedBox(
-                                                                    width: 289,
-                                                                    height: 35,
-                                                                    child: TextButton(
-                                                                      style: TextButton.styleFrom(
-                                                                        backgroundColor: const Color(0xff012169), // Amber button color
-                                                                        shape: RoundedRectangleBorder(
-                                                                          borderRadius: BorderRadius.circular(8),
-                                                                        ),
-                                                                      ),
-                                                                      onPressed: () async {
-                                                                        context.read<AdmissionBloc>().add(RemarksIsLoadingClicked(true));
-                                                                        try {
-                                                                              final response = await http.post(
-                                                                                Uri.parse('$apiUrl/api/admin/update_admission'),
-                                                                                headers: {
-                                                                                  'Content-Type': 'application/json',
-                                                                                  'supabase-url': supabaseUrl,
-                                                                                  'supabase-key': supabaseKey,
-                                                                                },
-                                                                                body: json.encode({
-                                                                                  'admission_id': details[0]['admission_id'], // Send admission_id in the request body
-                                                                                  'is_all_required_file_uploaded': true,
-                                                                                  'user_id': userId,
-                                                                                  'admission_status':'pending',
-                                                                                  'is_done': true,
-                                                                                }),
-                                                                              );
-                                                                              
-                                                                              if (response.statusCode == 200) {
-                                                                                final responseBody = jsonDecode(response.body);
-                                                                                context.read<AdmissionBloc>().add(RemarksIsLoadingClicked(false));
-                                                                                showDialog(
-                                                                                  context: context,
-                                                                                  builder: (BuildContext context) {
-                                                                                    return Dialog(
-                                                                                      shape: RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.circular(10),
-                                                                                      ),
-                                                                                      child: Container(
-                                                                                        width: 349,
-                                                                                        height: 272,
-                                                                                        padding: const EdgeInsets.all(16),
-                                                                                        child: Column(
-                                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                          children: [
-                                                                                            // Centered Text
-                                                                                            const Center(
-                                                                                              // child: Text(
-                                                                                              //   "",
-                                                                                              //   style: TextStyle(
-                                                                                              //     fontSize: 22,
-                                                                                              //   ),
-                                                                                              //   textAlign: TextAlign.center,
-                                                                                              // ),
-                                                                                            ),
-                                                                                            // Red X Icon with Circular Outline
-                                                                                            Column(
-                                                                                              children: [
-                                                                                                Container(
-                                                                                                  width: 90,
-                                                                                                  height: 90,
-                                                                                                  decoration: BoxDecoration(
-                                                                                                    shape: BoxShape.circle,
-                                                                                                    border: Border.all(color: const Color(0XFF012169), width: 2),
-                                                                                                  ),
-                                                                                                  child: const Center(
-                                                                                                    child: Icon(
-                                                                                                      Icons.check,
-                                                                                                      color: Color(0XFF012169),
-                                                                                                      size: 40,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                                const SizedBox(height: 20),
-                                                                                                // No Form Submitted Text
-                                                                                                const Text(
-                                                                                                  "Application Completed",
-                                                                                                  style: TextStyle(
-                                                                                                    fontSize: 22,
-                                                                                                    fontWeight: FontWeight.bold,
-                                                                                                  ),
-                                                                                                  textAlign: TextAlign.center,
-                                                                                                ),
-                                                                                              ],
-                                                                                            ),
-                                                                                            // Divider
-                                                                                            const Divider(
-                                                                                              thickness: 1,
-                                                                                              color: Colors.grey,
-                                                                                            ),
-                                                                                            // Close Button
-                                                                                            Align(
-                                                                                              alignment: Alignment.bottomCenter,
-                                                                                              child: ElevatedButton(
-                                                                                                onPressed: () {
-                                                                                                  Navigator.of(context).popUntil((route) => route.isFirst);
-                                                                                                },
-                                                                                                style: ElevatedButton.styleFrom(
-                                                                                                  backgroundColor: const Color(0xff012169), // Button color
-                                                                                                  shape: RoundedRectangleBorder(
-                                                                                                    borderRadius: BorderRadius.circular(8),
-                                                                                                  ),
-                                                                                                  minimumSize: const Size(double.infinity, 50), // Expand width and set height
-                                                                                                ),
-                                                                                                child: const Text(
-                                                                                                  "Close",
-                                                                                                  style: TextStyle(fontSize: 16, color: Colors.white),
-                                                                                                ),
-                                                                                              ),
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
-                                                                                    );
-                                                                                  },
-                                                                                );
-                                                                              } else {
-                                                                                // Handle failure
-                                                                                final responseBody = jsonDecode(response.body);
-                                                                                print('Error: ${responseBody['error']}');
-                                  
-                                                                                // Show failure modal
-                                                                                showDialog(
-                                                                                  context: context,
-                                                                                  builder: (context) => AlertDialog(
-                                                                                    title: const Text("Error"),
-                                                                                    content: Text("Failed to complete review: ${responseBody['error']}"),
-                                                                                    actions: [
-                                                                                      TextButton(
-                                                                                        onPressed: () {
-                                                                                          Navigator.of(context).pop(); // Close the dialog
-                                                                                        },
-                                                                                        child: const Text("OK"),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                );
-                                                                              }
-                                                                            } catch (error) {
-                                                                              // Handle error (e.g., network error)
-                                                                              print('Error: $error');
-                                  
-                                                                              // Show error modal
-                                                                              showDialog(
-                                                                                context: context,
-                                                                                builder: (context) => AlertDialog(
-                                                                                  title: const Text("Error"),
-                                                                                  content: const Text("An unexpected error occurred. Please try again later."),
-                                                                                  actions: [
-                                                                                    TextButton(
-                                                                                      onPressed: () {
-                                                                                        Navigator.of(context).pop(); // Close the dialog
-                                                                                      },
-                                                                                      child: const Text("OK"),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                              );
-                                                                            }
-                                  
-                                                                      },
-                                                                      child: const Text(
-                                                                        "Yes",
-                                                                        style: TextStyle(color: Colors.white),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                  
-                                                            ],
-                                                          ),
-                                                        );
-                                    },
-                                  ),
-                    ),
-                  );
-                  // Action for second button
-                  
-                }:null,
-                child: Text(
-                  "Mark as Complete",
-                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto-R', fontSize: 14 * scale),
-                ),
-              )*/
+              
             ],
           ),
         ],
@@ -1016,10 +753,14 @@ String formatDate(DateTime date) {
     }).toList();
   }
 
-    requests = requests.where((request) {
-      return request['db_admission_table']['db_required_documents_table'].isNotEmpty;
-    }).toList();
+        Future.delayed(const Duration(seconds: 5), () {
+        requests = requests.where((request) {
+          final documents = request['db_admission_table']?['db_required_documents_table'];
+          return documents.isNotEmpty;
+        }).toList();
+      });
 
+      
   requests.sort((a, b) {
     // Extract the admission statuses
     String admissionStatusA = a['db_admission_table']['admission_status'] ?? '';

@@ -63,17 +63,26 @@ class _AdmissionPaymentsPageState extends State<AdmissionPaymentsPage> {
   }
 
   void _onSearchChanged(String value) {
-    setState(() {
+    /*setState(() {
       searchQuery = value.toLowerCase();
-    });
+    });*/
+    if (value.isEmpty) {
+       _apiService.startPaymentStreaming(supabaseUrl, supabaseKey); // Restart normal streaming
+      admissionForms = _apiService.admissionFormsStream;
+    } else {
+      
+      _apiService.searchPaymentAdmissionForms(supabaseUrl,supabaseKey,value); // Perform search
+      admissionForms = _apiService.admissionFormsStream;
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _apiService = ApiService(apiUrl); // Replace with your actual API URL
-    admissionForms = _apiService.streamPaymentForms(supabaseUrl, supabaseKey);
+    //admissionForms = _apiService.streamPaymentForms(supabaseUrl, supabaseKey);
     // Initialize the service with your endpoint
+    _onSearchChanged('');
   }
 
   String capitalizeEachWord(String input) {
@@ -195,11 +204,11 @@ List<Map<String, dynamic>> sortRequests(List<Map<String, dynamic>> requests, Str
                                                     statusFilter)
                                                 .toList();
 
-                filteredRequest = filteredRequest.where((request) {
+                /*filteredRequest = filteredRequest.where((request) {
                         final formId = request['db_admission_table']['admission_form_id']?.toLowerCase() ?? '';
                         return formId.contains(searchQuery);
                       
-                    }).toList();
+                    }).toList();*/
 
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));

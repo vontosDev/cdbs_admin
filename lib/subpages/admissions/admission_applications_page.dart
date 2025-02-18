@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:cdbs_admin/bloc/admission_bloc/admission_bloc.dart';
 import 'package:cdbs_admin/bloc/auth/auth_bloc.dart';
@@ -40,15 +41,28 @@ class _AdmissionApplicationsPageState extends State<AdmissionApplicationsPage> {
   void initState() {
     super.initState();
     _apiService = ApiService(apiUrl); // Replace with your actual API URL
-    admissionForms = _apiService.streamAdmissionForms(supabaseUrl, supabaseKey);
+    //admissionForms = _apiService.streamAdmissionForms(supabaseUrl, supabaseKey);
     // Initialize the service with your endpoint
+    //_apiService.startStreaming(supabaseUrl, supabaseKey); // Start streaming data
+
+    // Listen to stream
+    //admissionForms = _apiService.admissionFormsStream;
+    _onSearchChanged('');
    
   }
 
-  void _onSearchChanged(String value) {
-    setState(() {
+  void _onSearchChanged(String query) async{
+    /*setState(() {
       searchQuery = value.toLowerCase();
-    });
+    });*/
+    if (query.isEmpty) {
+       _apiService.startStreaming(supabaseUrl, supabaseKey); // Restart normal streaming
+      admissionForms = _apiService.admissionFormsStream;
+    } else {
+      
+      _apiService.searchAdmissionForms(supabaseUrl,supabaseKey,query); // Perform search
+      admissionForms = _apiService.admissionFormsStream;
+    }
   }
 
   Future<void> fetchFormDetails(int id) async {
@@ -160,11 +174,13 @@ String formatDate(DateTime date) {
                 }
                 requests = snapshot.data ?? []; // Use the data from the snapshot
                 filteredRequest = sortRequests(requests);
-                filteredRequest = filteredRequest.where((request) {
+                /*filteredRequest = filteredRequest.where((request) {
+                        
                         final formId = request['db_admission_table']['admission_form_id']?.toLowerCase() ?? '';
+
                         return formId.contains(searchQuery);
                       
-                    }).toList();
+                    }).toList();*/
 
 
                 if (snapshot.hasError) {

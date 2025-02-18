@@ -1040,7 +1040,6 @@ TextField(
   // Build content for each action (VIEW, REMINDER, DEACTIVATE)
 Widget _buildViewContent(double scale, List<Map<String, dynamic>> details, int userId) {
     return Container(
-  padding: const EdgeInsets.all(16),
   child: Column(
     children: [
       // Back button with left arrow and "Back" text

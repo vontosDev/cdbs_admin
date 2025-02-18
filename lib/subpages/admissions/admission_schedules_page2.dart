@@ -132,7 +132,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
   final DateTime parsedTime = DateFormat('HH:mm').parse(time);
 
   // Format the DateTime object into a 12-hour format with AM/PM
-  final DateFormat formatter = DateFormat('hh a'); // 'hh' for 12-hour format, 'a' for AM/PM
+  final DateFormat formatter = DateFormat('hh:mm a'); // 'hh' for 12-hour format, 'a' for AM/PM
   
   // Return formatted time
   return formatter.format(parsedTime);  // Format the DateTime object to time only
@@ -170,7 +170,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
       
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      //padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,7 +190,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: _buildInfoColumn(
                           label: 'Exam Date',
                           value: formattedExamDate!,
@@ -199,7 +199,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: _buildInfoColumn(
                           label: 'Exam Time',
                           value: '${formatTime(myformDetails[0]['start_time'])} - ${formatTime(myformDetails[0]['end_time'])}',
@@ -208,7 +208,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: _buildInfoColumn(
                           label: 'Meeting Place',
                           value: myformDetails[0]['location'],
@@ -217,7 +217,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: _buildInfoColumn2(
                           label: 'Grade Level',
                           value: myformDetails[0]['grade_level'],
@@ -235,7 +235,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: _buildInfoColumn(
                           label: 'Date Created',
                           value: formattedDate!,

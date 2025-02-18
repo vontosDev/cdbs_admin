@@ -4,8 +4,13 @@ import 'dart:async';
 
 class ApiService {
   final String apiUrl;
+  late StreamController<List<Map<String, dynamic>>> _streamController;
+  Timer? _timer;
+  ApiService(this.apiUrl){
+    _streamController = StreamController<List<Map<String, dynamic>>>.broadcast();
+  }
 
-  ApiService(this.apiUrl);
+  Stream<List<Map<String, dynamic>>> get admissionFormsStream => _streamController.stream;
 
   Future<List<Map<String, dynamic>>> fetchAdmissionForms(String supabaseUrl, String supabaseKey) async {
     final response = await http.get(
@@ -26,6 +31,53 @@ class ApiService {
       throw Exception('Failed to form data');
     }
   }
+
+
+
+  void startStreaming(String supabaseUrl, String supabaseKey) {
+    _timer?.cancel(); // Cancel any existing timer
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      try {
+        final members = await fetchAdmissionForms(supabaseUrl, supabaseKey);
+        final filteredMembers = members.where((member) => member['db_admission_table'] != null).toList();
+        _streamController.add(filteredMembers);
+      } catch (e) {
+        print('Error fetching members: $e');
+        _streamController.add([]);
+      }
+    });
+  }
+
+  // Stop the stream when searching
+  void stopStreaming() {
+    _timer?.cancel();
+  }
+
+  // Fetch data manually (for search)
+  Future<void> searchAdmissionForms(String supabaseUrl, String supabaseKey, String query) async {
+    stopStreaming(); // Stop the automatic refresh
+    try {
+      final response = await http.get(
+        Uri.parse('$apiUrl/api/admin/search_overview?search=$query'),
+        headers: {
+          "supabase-url": supabaseUrl,
+          "supabase-key": supabaseKey,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final searchResults = List<Map<String, dynamic>>.from(data['userData'] ?? []);
+        _streamController.add(searchResults);
+      } else {
+        throw Exception('Failed to fetch search results');
+      }
+    } catch (e) {
+      print('Error searching: $e');
+      _streamController.add([]);
+    }
+  }
+
 
   Stream<List<Map<String, dynamic>>> streamAdmissionForms(String supabaseUrl, String supabaseKey) async* {
   while (true) {
@@ -258,6 +310,48 @@ Future<List<Map<String, dynamic>>> fetchPaymentForms(String supabaseUrl, String 
       
     } else {
       throw Exception('Failed to form data');
+    }
+  }
+
+
+
+
+  void startPaymentStreaming(String supabaseUrl, String supabaseKey) {
+    _timer?.cancel(); // Cancel any existing timer
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      try {
+        final members = await fetchPaymentForms(supabaseUrl, supabaseKey);
+        final filteredMembers = members.where((member) => member['db_admission_table'] != null).toList();
+        _streamController.add(filteredMembers);
+      } catch (e) {
+        print('Error fetching members: $e');
+        _streamController.add([]);
+      }
+    });
+  }
+
+  // Fetch data manually (for search)
+  Future<void> searchPaymentAdmissionForms(String supabaseUrl, String supabaseKey, String query) async {
+    stopStreaming(); // Stop the automatic refresh
+    try {
+      final response = await http.get(
+        Uri.parse('$apiUrl/api/admin/search_payments?search=$query'),
+        headers: {
+          "supabase-url": supabaseUrl,
+          "supabase-key": supabaseKey,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final searchResults = List<Map<String, dynamic>>.from(data['userData'] ?? []);
+        _streamController.add(searchResults);
+      } else {
+        throw Exception('Failed to fetch search results');
+      }
+    } catch (e) {
+      print('Error searching: $e');
+      _streamController.add([]);
     }
   }
 
