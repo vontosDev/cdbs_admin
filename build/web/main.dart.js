@@ -53512,7 +53512,7 @@ j=t.N
 i=A.a1(["Content-Type","application/json","supabase-url",u.I,"supabase-key",u.y],j,j)
 h=o.c
 s=6
-return A.z(A.dT(k,B.w.ce(A.a1(["admission_id",J.c(J.c(h,"db_admission_table"),"admission_id"),"user_id",f.a.e,"is_assessment",!0,"is_attended",!0],j,t.z)),i),$async$$0)
+return A.z(A.dT(k,B.w.ce(A.a1(["admission_id",J.c(J.c(h,"db_admission_table"),"admission_id"),"user_id",f.a.e,"is_assessment",!0,"is_attended",!0,"admission_status","pending"],j,t.z)),i),$async$$0)
 case 6:n=b
 if(n.b===200){k=n
 B.w.bP(0,A.bC(A.bB(k.e).c.a.h(0,"charset")).ak(0,k.w),null)

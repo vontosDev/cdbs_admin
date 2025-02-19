@@ -483,7 +483,8 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                                               'admission_id': admissionSchedule['db_admission_table']['admission_id'],
                                               'user_id': widget.userId,
                                               'is_assessment': true,
-                                              'is_attended': true
+                                              'is_attended': true,
+                                              'admission_status':'pending'
                                             }),
                                           );
 
