@@ -200,7 +200,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       const SizedBox(width: 16),
                       Expanded(
                         flex: 1,
-                        child: _buildInfoColumn(
+                        child: _buildInfoColumn2(
                           label: 'Exam Time',
                           value: '${formatTime(myformDetails[0]['start_time'])} - ${formatTime(myformDetails[0]['end_time'])}',
                           scale: scale,
@@ -839,7 +839,7 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
                       
                       Expanded(
                         flex: 9,
-                        child: _buildInfoColumn(
+                        child: _buildCRColumn(
                           label: 'Cancel Reason',
                           value: admissionSchedule['schedule_cancel_reason'] ??'', // Example, adjust according to your data
                           scale: scale,
@@ -947,6 +947,72 @@ class _AdmissionSchedulesPage2State extends State<AdmissionSchedulesPage2> {
               ),
               child: Container(
                 width: 85,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12 * scale,
+                    fontFamily: 'Roboto-B',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Container(
+        height: 1,
+        color: const Color(0xFF909590),
+      ),
+    ],
+  );
+}
+
+
+
+Widget _buildCRColumn({
+  required String label,
+  required String value,
+  required double scale,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11 * scale,
+              fontFamily: 'Roboto-R',
+            ),
+          ),
+          const SizedBox(width: 30),
+          // Wrap the Text widget in a MouseRegion to detect hover and show a popup (tooltip)
+          MouseRegion(
+            onEnter: (_) {
+              // You can define actions on hover if needed
+            },
+            onExit: (_) {
+              // You can define actions on hover exit if needed
+            },
+            child: Tooltip(
+              message: value, // The full value will be shown when hovering
+              padding: const EdgeInsets.all(8.0), // Adjust padding around the tooltip
+              decoration: BoxDecoration(
+                color: const Color(0xff012169),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 11 * scale,
+                fontFamily: 'Roboto-B',
+              ),
+              child: Container(
+                width: 240,
                 child: Text(
                   value,
                   style: TextStyle(
