@@ -541,7 +541,7 @@ Future<List<Map<String, dynamic>>> fetchAdminForms(String supabaseUrl, String su
 
 
 
-  Future<List<Map<String, dynamic>>> fetchAdmissionResult(String supabaseUrl, String supabaseKey) async {
+  /*Future<List<Map<String, dynamic>>> fetchAdmissionResult(String supabaseUrl, String supabaseKey) async {
     final response = await http.get(
       Uri.parse('$apiUrl/api/admin/get_admission_for_result'),
       headers: {
@@ -559,7 +559,40 @@ Future<List<Map<String, dynamic>>> fetchAdminForms(String supabaseUrl, String su
     } else {
       throw Exception('Failed to form data');
     }
+  }*/
+
+  Future<List<Map<String, dynamic>>> fetchAdmissionResult(String supabaseUrl, String supabaseKey) async {
+  final response = await http.get(
+    Uri.parse('$apiUrl/api/admin/get_admission_for_result'),
+    headers: {
+      "supabase-url": supabaseUrl,
+      "supabase-key": supabaseKey,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> data = json.decode(response.body);
+    
+    // Ensure the type safety by converting to List<Map<String, dynamic>>
+    List<Map<String, dynamic>> members = List<Map<String, dynamic>>.from(data['user'] ?? []);
+
+    // Filter out duplicates by admission_id
+    Map<int, Map<String, dynamic>> uniqueMembers = {};
+
+    for (var member in members) {
+      int admissionId = member['admission_id'];
+      if (!uniqueMembers.containsKey(admissionId)) {
+        uniqueMembers[admissionId] = member;
+      }
+    }
+
+    // Return the list of unique members (based on admission_id)
+    return uniqueMembers.values.toList();
+  } else {
+    throw Exception('Failed to fetch data');
   }
+}
+
 
   Stream<List<Map<String, dynamic>>> streamAdmissionResult(String supabaseUrl, String supabaseKey) async* {
   while (true) {

@@ -55,6 +55,7 @@ class _AdmissionResultsPage2State
   String? formattedDate;
   String? docStatus;
   bool isLoading = false;
+  bool isToChange =true;
   List<Map<String, dynamic>> myformDetails = [];
   List<PlatformFile> _selectedFiles =[];
   bool isSelect = false;
@@ -73,6 +74,14 @@ class _AdmissionResultsPage2State
     dateCreatedString = myformDetails[0]['db_admission_table']['created_at'];
     DateTime dateCreated = DateTime.parse(dateCreatedString!);
     formattedDate = formatDate(dateCreated);
+    if(myformDetails[0]['db_admission_table']['is_final_result']){
+      statusController.text=status!;
+      if(status=='WAITLIST'){
+        isToChange=true;
+      }else{
+        isToChange=false;
+      }
+    }
   }
 
   Future<void> updateData(int admissionId) async {
@@ -743,7 +752,7 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
                               const SizedBox(width: 40),
                               Expanded(
                                   flex: 2,
-                                  child: StatusDropdown(controller: statusController, title: 'Status', choices: const ['','PASSED','PROBITIONARY','FAILED','WAITLIST'],)
+                                  child: StatusDropdown(controller: statusController, title: 'Status', choices: const ['','PASSED','PROBATIONARY','FAILED','WAITLIST'],)
                                   ),
                                   const SizedBox(width: 40),
                                   authState.adminType=='Admin' || authState.adminType=='Principal' || authState.adminType=='Registrar' || authState.adminType=='IT' || authState.adminType=='Sisters' || authState.adminType=='Center for Learner Wellness'?
@@ -752,7 +761,7 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
                                   child: Row(
                                     children: [
                                       ElevatedButton(
-                                        onPressed: () {
+                                        onPressed: isToChange?() {
                                                     // Handle accept action
                                                     showDialog(
                                                       context: context,
@@ -949,6 +958,19 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
                                                                                     if (response.statusCode == 200) {
                                                                                       final responseBody = jsonDecode(response.body);
                                                                                       myformDetails = await ApiService(apiUrl).getFormsDetailsById(myformDetails[0]['db_admission_table']['admission_id'], supabaseUrl, supabaseKey);
+                                                                                      setState(() {
+                                                                                        status = myformDetails[0]['db_admission_table']['admission_status'];
+                                                                                        DateTime dateCreated = DateTime.parse(dateCreatedString!);
+                                                                                        formattedDate = formatDate(dateCreated);
+                                                                                        if(myformDetails[0]['db_admission_table']['is_final_result']){
+                                                                                          statusController.text=status!;
+                                                                                          if(status=='WAITLIST'){
+                                                                                            isToChange=true;
+                                                                                          }else{
+                                                                                            isToChange=false;
+                                                                                          }
+                                                                                        }
+                                                                                      });
                                                                                       context.read<AdmissionBloc>().add(IsLoadingClicked(false));
                                                                                       Navigator.of(context).popUntil((route) => route.isFirst);
                                                                                       _showMessage('Result is now saved', 'Save Successfully');
@@ -1015,7 +1037,7 @@ Future<Uint8List?> _getFileBytes(PlatformFile file) async {
                                                         ),
                                                       ),
                                                     );
-                                                  },
+                                                  }:null,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: const Color(0xff007937),
                                           padding: const EdgeInsets.symmetric(
