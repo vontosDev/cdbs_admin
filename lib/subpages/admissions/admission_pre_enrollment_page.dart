@@ -2,10 +2,8 @@ import 'package:cdbs_admin/bloc/admission_bloc/admission_bloc.dart';
 import 'package:cdbs_admin/bloc/auth/auth_bloc.dart';
 import 'package:cdbs_admin/class/admission_forms.dart';
 import 'package:cdbs_admin/shared/api.dart';
-import 'package:cdbs_admin/subpages/admissions/admission_payments_page2.dart';
-import 'package:cdbs_admin/subpages/admissions/admission_requirements_page2.dart';
+import 'package:cdbs_admin/subpages/admissions/admission_preenrollment_page2.dart';
 import 'package:cdbs_admin/subpages/landing_page.dart';
-import 'package:cdbs_admin/subpages/s1.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -70,7 +68,7 @@ class _PreEnrollmentPageState extends State<PreEnrollmentPage> {
   void initState() {
     super.initState();
     _apiService = ApiService(apiUrl); // Replace with your actual API URL
-    admissionForms = _apiService.streamPaymentForms(supabaseUrl, supabaseKey);
+    admissionForms = _apiService.streamReservation(supabaseUrl, supabaseKey);
     // Initialize the service with your endpoint
   }
 
@@ -86,6 +84,8 @@ class _PreEnrollmentPageState extends State<PreEnrollmentPage> {
         .join(' '); // Join the words back into a single string with spaces
   }
   
+
+  
 String formatDate(DateTime date) {
   // Convert the UTC date to local time
   DateTime localDate = date.toLocal();
@@ -100,7 +100,7 @@ String formatDate(DateTime date) {
 
 
   Color _getStatusColor(String status) {
-      if (status.contains('complete') || status.contains('passed')) {
+      if (status.contains('paid') || status.contains('passed')) {
         return const Color(0xFF007A33); // Green for complete
       } else if (status.contains('in review')) {
         return const Color(0xFFFFA500); // Yellow for in-review
@@ -307,17 +307,24 @@ const SizedBox(height: 40),
                 itemBuilder: (context, index) {
                   final request = filteredRequest[index];
                   final fullName = '${capitalizeEachWord(request['db_admission_table']['first_name'])} ${capitalizeEachWord(request['db_admission_table']['last_name'])}';
-                  final processBy = request['db_admission_table']['db_admission_form_handler_table'].isNotEmpty
-    ? '${request['db_admission_table']['db_admission_form_handler_table'][0]['db_admin_table']['first_name']} ${request['db_admission_table']['db_admission_form_handler_table'][0]['db_admin_table']['last_name']}'
-    : '---';
+                  final processBy = request['db_admission_table']['db_admission_form_handler_table']
+    .where((handler) => handler['is_done'] == false)
+    .map((handler) => '${handler['db_admin_table']['first_name']} ${handler['db_admin_table']['last_name']}')
+    .join(', ') ?? '---';
                   List<bool> checkboxStates = List.generate(filteredRequest.length, (_) => false);
                   String dateCreatedString = request['db_admission_table']['created_at'];
                   DateTime dateCreated = DateTime.parse(dateCreatedString);
                   String formattedDate = formatDate(dateCreated);
 
-                  String stat= request['db_admission_table']['admission_status'];
+                  String stat= 'pending';
                   bool isRequired= request['db_admission_table']['is_all_required_file_uploaded'];
-                  bool isPaid= request['db_admission_table']['is_paid'] ?? false;
+                  bool isPaid = false;
+                  if(request['db_admission_table']['db_payments_table'].isNotEmpty){
+                    stat = request['db_admission_table']['db_payments_table'][0]['status'];
+                    if(stat=='paid'){
+                      isPaid =true;
+                    }
+                  }
                   String paymethod='---';
                   if(request['db_admission_table']['db_payment_method_table'] != null){
                      paymethod =request['db_admission_table']['db_payment_method_table']['payment_method'];
@@ -364,9 +371,9 @@ const SizedBox(height: 40),
                     ),
                     Expanded(
                       flex: 2,
-                      child: SelectableText(!isPaid?stat=='complete' && isRequired?'PENDING':stat.toUpperCase():'COMPLETE',
+                      child: SelectableText(!isPaid?stat=='paid' ?'PENDING':stat.toUpperCase():'COMPLETE',
                         style: TextStyle(fontFamily: 'Roboto-R', fontSize: 16 * scale,
-                        color: isPaid?const Color(0xFF007A33):_getStatusColor(request['db_admission_table']['admission_status'])),
+                        color: isPaid?const Color(0xFF007A33):_getStatusColor(stat)),
                       ),
                     ),
                     Expanded(
@@ -382,14 +389,13 @@ const SizedBox(height: 40),
                         child: PopupMenuButton<int>(
                           icon: const Icon(Icons.more_vert),
                           onSelected: (value) async {
-                            List<Map<String, dynamic>> members = await ApiService(apiUrl).getDetailsById(request['admission_id'], supabaseUrl, supabaseKey);
+                            List<Map<String, dynamic>> members = await ApiService(apiUrl).getReservationDetailsById(request['admission_id'], supabaseUrl, supabaseKey);
                                      if(members.isNotEmpty){
                                         setState(()  {
                                           formDetails=members;
                                           _selectedAction = value; // Change the selected action
                                         });
-
-                                        if(!request['db_admission_table']['is_paid']){
+                                        if(request['db_admission_table']['db_payments_table'][0]['status'] !='paid'){
                                           try {
                                             final response = await http.post(
                                               Uri.parse('$apiUrl/api/admin/update_admission'),
@@ -399,8 +405,7 @@ const SizedBox(height: 40),
                                                 'supabase-key': supabaseKey,
                                               },
                                               body: json.encode({
-                                                'admission_id': request['admission_id'],
-                                                'admission_status':'in review',  // Send customer_id in the request body
+                                                'admission_id': request['admission_id'],  // Send customer_id in the request body
                                                 'user_id':authState.uid
                                               }),
                                             );
@@ -500,7 +505,7 @@ const SizedBox(height: 40),
       ),
       
       // Adding AdmissionApplicationsPage2 below the buttons
-       AdmissionPaymentsPage2(formDetails: details, onNextPressed: (bool isClicked) {
+       PreEnrollmentPage2(formDetails: details, onNextPressed: (bool isClicked) {
          context.read<AdmissionBloc>().add(MarkAsCompleteClicked(isClicked));
        },userId: userId, adminType: adminType,),
     ],
