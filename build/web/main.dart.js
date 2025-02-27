@@ -8726,18 +8726,16 @@ avL:function avL(a,b,c){this.a=a
 this.b=b
 this.c=c},
 avI:function avI(){},
-avH:function avH(a,b,c,d,e){var _=this
+avH:function avH(a,b,c,d){var _=this
 _.a=a
 _.b=b
 _.c=c
-_.d=d
-_.e=e},
-avG:function avG(a,b,c,d,e){var _=this
+_.d=d},
+avG:function avG(a,b,c,d){var _=this
 _.a=a
 _.b=b
 _.c=c
-_.d=d
-_.e=e},
+_.d=d},
 avE:function avE(a,b,c){this.a=a
 this.b=b
 this.c=c},
@@ -51911,14 +51909,14 @@ i=A.u(A.U(A.a([A.dd(i,A.o(a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,m,a0,a0,a0,a0,a0,!0,a
 h=A.u(A.dd(a6,A.o(a0,a0,a0,a0,a0,a0,a0,a0,a1,a0,a0,m,a0,a0,a0,a0,a0,!0,a0,a0,a0,a0,a0,a0,a0,a0)),2)
 if(!p)g=q==="complete"&&o?"PENDING":q.toUpperCase()
 else g="COMPLETE"
-return A.S(A.a([A.U(A.a([k,j,i,h,A.u(A.dd(g,A.o(a0,a0,p?B.c9:a2.acv(J.c(a4.h(a3,f),a)),a0,a0,a0,a0,a0,a1,a0,a0,m,a0,a0,a0,a0,a0,!0,a0,a0,a0,a0,a0,a0,a0,a0)),1),A.u(A.dd(r,A.o(a0,a0,a0,a0,a0,a0,a0,a0,a1,a0,a0,m,a0,a0,a0,a0,a0,!0,a0,a0,a0,a0,a0,a0,a0,a0)),2),A.dI(new A.avH(a2,a3,p,this.c,n),new A.avI(),t.J,t.hR)],l),B.h,B.f,B.d,a0),B.an],l),B.h,B.f,B.d)},
+return A.S(A.a([A.U(A.a([k,j,i,h,A.u(A.dd(g,A.o(a0,a0,p?B.c9:a2.acv(J.c(a4.h(a3,f),a)),a0,a0,a0,a0,a0,a1,a0,a0,m,a0,a0,a0,a0,a0,!0,a0,a0,a0,a0,a0,a0,a0,a0)),1),A.u(A.dd(r,A.o(a0,a0,a0,a0,a0,a0,a0,a0,a1,a0,a0,m,a0,a0,a0,a0,a0,!0,a0,a0,a0,a0,a0,a0,a0,a0)),2),A.dI(new A.avH(a2,a3,this.c,n),new A.avI(),t.J,t.hR)],l),B.h,B.f,B.d,a0),B.an],l),B.h,B.f,B.d)},
 $S:42}
 A.avI.prototype={
 $2(a,b){},
 $S:25}
 A.avH.prototype={
 $2(a,b){var s=this
-return A.u(A.nH(B.cV,new A.avF(s.e),new A.avG(s.a,s.b,a,s.c,s.d),t.S),1)},
+return A.u(A.nH(B.cV,new A.avF(s.d),new A.avG(s.a,s.b,a,s.c),t.S),1)},
 $S:499}
 A.avG.prototype={
 $1(a){return this.a4b(a)},
@@ -51936,14 +51934,15 @@ J.bZ(A.cL(o.c,!1,t.J),new A.m3(d))
 s=e.gbt(g)?3:4
 break
 case 3:f.H(new A.avE(f,g,a))
-s=!o.d?5:6
+A.aG("Before if: "+A.i(J.c(h.h(i,"db_admission_table"),"is_all_required_file_uploaded")))
+s=!J.d(J.c(h.h(i,"db_admission_table"),"is_all_required_file_uploaded"),!0)?5:6
 break
 case 5:q=8
 f=A.bD(u.K)
 e=t.N
 k=A.a_(["Content-Type","application/json","supabase-url",u.I,"supabase-key",u.y],e,e)
 s=11
-return A.z(A.dy(f,B.v.c0(A.a_(["admission_id",h.h(i,"admission_id"),"admission_status","in review","is_admin_reviewing",!0,"user_id",o.e.a],e,t.z)),k),$async$$1)
+return A.z(A.dy(f,B.v.c0(A.a_(["admission_id",h.h(i,"admission_id"),"admission_status","in review","is_admin_reviewing",!0,"user_id",o.d.a],e,t.z)),k),$async$$1)
 case 11:n=a0
 if(n.b===200){i=n
 B.v.bL(0,A.bu(A.bs(i.e).c.a.h(0,"charset")).ah(0,i.w),null)}else{i=n

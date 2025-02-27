@@ -494,8 +494,11 @@ String formatDate(DateTime date) {
                                 formDetails=members;
                               _selectedAction = value; // Change the selected action
                             });
-                            if(!isRequired){
+                            
+                            print("Before if: ${request['db_admission_table']['is_all_required_file_uploaded']}");
+                            if(request['db_admission_table']['is_all_required_file_uploaded'] != true){
                               try {
+                                
                                           final response = await http.post(
                                             Uri.parse('$apiUrl/api/admin/update_admission'),
                                             headers: {
@@ -510,7 +513,6 @@ String formatDate(DateTime date) {
                                               'user_id':authState.uid
                                             }),
                                           );
-
                                           if (response.statusCode == 200) {
                                             final responseBody = jsonDecode(response.body);
                                           } else {
